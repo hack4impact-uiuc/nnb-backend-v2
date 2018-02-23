@@ -25,8 +25,8 @@
 
 **STORY**
 
-|   id   |  story_name | story_id | 
-|:--------:|:------:|:-----------:|
+|   id   |  story_name |
+|:--------:|:------:|
 
 **STORY_POI**
 
