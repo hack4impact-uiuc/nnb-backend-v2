@@ -18,7 +18,8 @@ class Poi(db.Model):
 
     #One-to-many relationships
     media = db.relationship('Media', backref='poi', lazy=True)
-    link = db.relationship('Link', backref='poi', lazy=True)
+    links = db.relationship('Link', backref='poi', lazy=True)
+    story_pois = db.relationship('Story_Poi', backref='poi', lazy=True)
 
 class Media(db.Model):
     """Media"""
