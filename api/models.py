@@ -4,8 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 # db = SQLAlchemy()
 
+#TODO: __repr__ functions basically same as original
+#TODO: implement toDict functions
+
 class Poi(db.Model):
-    """PointOfInterest"""
+    """Point of interest table"""
     __tablename__ = "poi"
 
     id = db.Column(db.Integer, unique=True, primary_key=True)
@@ -21,8 +24,11 @@ class Poi(db.Model):
     links = db.relationship('Link', backref='poi', lazy=True)
     story_pois = db.relationship('Story_Poi', backref='poi', lazy=True)
 
+    def __repr__(self):
+        return '<name {}>'.format(self.name)
+
 class Media(db.Model):
-    """Media"""
+    """Media table"""
     __tablename__ = "media"
 
     id = db.Column(db.Integer, unique=True, primary_key=True) 
@@ -30,28 +36,53 @@ class Media(db.Model):
     caption = db.Column(db.String, nullable=True)
     poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='SET NULL'), nullable=True)
 
+    def __repr__(self):
+        return '<content_url {}>'.format(self.content_url)
+
 class Link(db.Model):
-    """Link"""
+    """Link table"""
     __tablename__ = "link"
+
     id = db.Column(db.Integer, unique=True, primary_key=True)
     link_url = db.Column(db.String, nullable=True)
     display_name = db.Column(db.String, nullable=True)
     poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='SET NULL'), nullable=True)
 
+    def __repr__(self):
+        return '<additional_links poi_id = {}>'.format(self.poi_id)
+
+class Map(db.Model):
+    """Map table"""
+    __tablename__ = "map"
+
+    id = db.Column(db.Integer, unique=True, primary_key=True) 
+    image_url = db.Column(db.String, nullable=False)
+    map_year = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return '<map {}>'.format(self.map_year)
+
 class Story(db.Model):
-    """Story"""
+    """Story table"""
     __tablename__ = "story"
     id = db.Column(db.Integer, unique=True, primary_key=True)
     story_name = db.Column(db.String, nullable=False)
 
     #One-to-many relationship
-    story_poi = db.relationship('Story_Poi', backref='story')
+    story_pois = db.relationship('Story_Poi', backref='story')
+
+    def __repr__(self):
+        return '<story_names {}>'.format(self.story_name)
 
 class Story_Poi(db.Model):
-    """Story_Poi"""
+    """Story POIs table"""
     __tablename__ = "story_poi"
     id = db.Column(db.Integer, unique=True, primary_key=True)
+    story_id = db.Column(db.Integer, db.ForeignKey("story.id", ondelete='SET NULL'), nullable=True)
     poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='SET NULL'), nullable=True)
+
+    def __repr__(self):
+        return '<stories {}>'.format(self.id)
 
 
 # class Person(db.Model):
