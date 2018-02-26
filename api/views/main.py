@@ -16,6 +16,7 @@ def index():
 # @app.route('/persons')
 # def name():
 #     try:
-#         create_response(data=Person.query.all())
+#		  data = {"persons": Person.query.all()}
+#         create_response(data)
 #     except Exception as ex:
 #         return create_response(data={}, status=400, message=str(ex))
