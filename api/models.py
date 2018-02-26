@@ -4,10 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 # db = SQLAlchemy()
 
-#TODO: __repr__ functions basically same as original
 #TODO: implement toDict functions
 
-class Poi(db.Model):
+class POI(db.Model):
     """Point of interest table"""
     __tablename__ = "poi"
 
@@ -22,7 +21,7 @@ class Poi(db.Model):
     #One-to-many relationships
     media = db.relationship('Media', backref='poi', lazy=True)
     links = db.relationship('Link', backref='poi', lazy=True)
-    story_pois = db.relationship('Story_Poi', backref='poi', lazy=True)
+    story_pois = db.relationship('StoryPOI', backref='poi', lazy=True)
 
     def __repr__(self):
         return '<name {}>'.format(self.name)
@@ -34,7 +33,7 @@ class Media(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True) 
     content_url = db.Column(db.String, nullable=True)
     caption = db.Column(db.String, nullable=True)
-    poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='SET NULL'), nullable=True)
+    poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='CASCADE'), nullable=True)
 
     def __repr__(self):
         return '<content_url {}>'.format(self.content_url)
@@ -46,7 +45,7 @@ class Link(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     link_url = db.Column(db.String, nullable=True)
     display_name = db.Column(db.String, nullable=True)
-    poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='SET NULL'), nullable=True)
+    poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='CASCADE'), nullable=True)
 
     def __repr__(self):
         return '<additional_links poi_id = {}>'.format(self.poi_id)
@@ -69,46 +68,17 @@ class Story(db.Model):
     story_name = db.Column(db.String, nullable=False)
 
     #One-to-many relationship
-    story_pois = db.relationship('Story_Poi', backref='story')
+    story_pois = db.relationship('StoryPOI', backref='story')
 
     def __repr__(self):
         return '<story_names {}>'.format(self.story_name)
 
-class Story_Poi(db.Model):
+class StoryPOI(db.Model):
     """Story POIs table"""
     __tablename__ = "story_poi"
     id = db.Column(db.Integer, unique=True, primary_key=True)
-    story_id = db.Column(db.Integer, db.ForeignKey("story.id", ondelete='SET NULL'), nullable=True)
-    poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='SET NULL'), nullable=True)
+    story_id = db.Column(db.Integer, db.ForeignKey("story.id", ondelete='CASCADE'), nullable=True)
+    poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='CASCADE'), nullable=True)
 
     def __repr__(self):
         return '<stories {}>'.format(self.id)
-
-
-# class Person(db.Model):
-#     """Person"""
-#     __tablename__ = "person"
-
-#     id = db.Column(db.Integer, unique=True, primary_key=True)
-#     name = db.Column(db.String, nullable=False)
-#     emails = db.relationship('Email',backref='emails')
-
-#     def __init__(self, name):
-#         self.name = name
-
-#     def __repr__(self):
-#         return '<name {}>'.format(self.name)
-
-# class Email(db.Model):
-#     """Email"""
-#     __tablename__ = "email"
-    
-#     id = db.Column(db.Integer, unique=True, primary_key=True)
-#     email = db.Column(db.String, nullable=False)
-#     person = db.Column(db.Integer, db.ForeignKey('person.id', ondelete='SET NULL'), nullable=True)
-
-#     def __init__(self, email):
-#             self.email = email
-
-#     def __repr__(self):
-#         return '<email {}>'.format(self.email)

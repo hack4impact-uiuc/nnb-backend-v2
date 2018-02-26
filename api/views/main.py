@@ -1,6 +1,6 @@
 from api import app
 from flask import Blueprint, request
-from api.models import Poi
+from api.models import POI
 import json
 from flask import jsonify
 from api.utils import create_response, InvalidUsage
