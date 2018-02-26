@@ -1,5 +1,5 @@
 import json
-import jsonify
+from flask import jsonify
 
 def create_response(data={}, status=200, message=''):
     """
@@ -13,6 +13,9 @@ def create_response(data={}, status=200, message=''):
     - the key is the name of the type of data
     - the value is the data itself
     """
+    if type(data) is not dict:
+        raise TypeError('Data should be a dictionary 😞')
+
     response = {
         'success': 200 <= status < 300,
         'code': status,
