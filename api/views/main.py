@@ -13,9 +13,9 @@ def index():
     return '<h1>Test 1.0!</h1>'
 
 #function that is called when you visit /persons
-@app.route('/persons')
-def name():
-    try:
-        create_response(data=Person.query.all())
-    except Exception as ex:
-        return create_response(data={}, status=400, message=str(ex))
+# @app.route('/persons')
+# def name():
+#     try:
+#         create_response(data=Person.query.all())
+#     except Exception as ex:
+#         return create_response(data={}, status=400, message=str(ex))

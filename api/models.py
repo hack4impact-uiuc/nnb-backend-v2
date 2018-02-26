@@ -2,13 +2,8 @@ from api import db
 from sqlalchemy.dialects.postgresql import JSON
 from flask_sqlalchemy import SQLAlchemy
 
-# db = SQLAlchemy()
-
-#TODO: implement toDict functions
-
 class POI(db.Model):
-    """Point of interest table"""
-    __tablename__ = "poi"
+    __tablename__ = 'poi'
 
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String, nullable=False)
@@ -19,16 +14,15 @@ class POI(db.Model):
     y_coord = db.Column(db.Float, nullable=False)
 
     #One-to-many relationships
-    media = db.relationship('Media', backref='poi', lazy=True)
-    links = db.relationship('Link', backref='poi', lazy=True)
-    story_pois = db.relationship('StoryPOI', backref='poi', lazy=True)
+    media = db.relationship('Media', backref='poi')
+    links = db.relationship('Link', backref='poi')
+    story_pois = db.relationship('StoryPOI', backref='poi')
 
     def __repr__(self):
         return '<name {}>'.format(self.name)
 
 class Media(db.Model):
-    """Media table"""
-    __tablename__ = "media"
+    __tablename__ = 'media'
 
     id = db.Column(db.Integer, unique=True, primary_key=True) 
     content_url = db.Column(db.String, nullable=True)
@@ -39,8 +33,7 @@ class Media(db.Model):
         return '<content_url {}>'.format(self.content_url)
 
 class Link(db.Model):
-    """Link table"""
-    __tablename__ = "link"
+    __tablename__ = 'link'
 
     id = db.Column(db.Integer, unique=True, primary_key=True)
     link_url = db.Column(db.String, nullable=True)
@@ -51,8 +44,7 @@ class Link(db.Model):
         return '<additional_links poi_id = {}>'.format(self.poi_id)
 
 class Map(db.Model):
-    """Map table"""
-    __tablename__ = "map"
+    __tablename__ = 'map'
 
     id = db.Column(db.Integer, unique=True, primary_key=True) 
     image_url = db.Column(db.String, nullable=False)
@@ -62,8 +54,7 @@ class Map(db.Model):
         return '<map {}>'.format(self.map_year)
 
 class Story(db.Model):
-    """Story table"""
-    __tablename__ = "story"
+    __tablename__ = 'story'
     id = db.Column(db.Integer, unique=True, primary_key=True)
     story_name = db.Column(db.String, nullable=False)
 
@@ -74,10 +65,9 @@ class Story(db.Model):
         return '<story_names {}>'.format(self.story_name)
 
 class StoryPOI(db.Model):
-    """Story POIs table"""
-    __tablename__ = "story_poi"
+    __tablename__ = 'story_poi'
     id = db.Column(db.Integer, unique=True, primary_key=True)
-    story_id = db.Column(db.Integer, db.ForeignKey("story.id", ondelete='CASCADE'), nullable=True)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id', ondelete='CASCADE'), nullable=True)
     poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='CASCADE'), nullable=True)
 
     def __repr__(self):
