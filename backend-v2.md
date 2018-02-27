@@ -141,60 +141,122 @@ Delete the specified POI.
     }
     
 ## Maps
-**Endpoint**
+
+### Endpoint
 
     GET /maps
 
 **Description**
 
-Get all map years.
+Get all map years
 
 **Response**
 
     {
-
+      success: true,
+      code: 200,
+      message: '',
+      result: {
+        maps: [
+          {
+            _id: 1,
+            image_url: 'https://maps.com/1969.jpg',
+            map_year: 1969
+          },
+          {
+            _id: 2,
+            image_url: 'https://maps.com/2000.jpg',
+            map_year: 2000
+          },
+          {
+            _id: 3,
+            image_url: 'https://maps.com/2018.jpg',
+            map_year: 2018
+          }
+        ]
+      }
     }
     
-**Endpoint**
+### Endpoint
 
     GET /maps/<map_id>
 
 **Description**
 
-Get map model data and all POIs associated with the specified map. (POI map_year == MAPS map_year)
+Get map model data and all POIs associated with the specified map (POI map_year == MAPS map_year)
 
 **Response**
 
     {
+      success: true,
+      code: 200,
+      message: '',
+      result: {
+        'map': {
+          _id: 1,
+          image_url: 'https://maps.com/1969.jpg',
+          map_year: 1969,
+          pois: [
+            {
 
+            },
+            {
+
+            },
+            {
+
+            }
+          ]
+        }
+      }
     }
     
-**Endpoint**
+### Endpoint
 
     POST /maps
 
 **Description**
 
-Create a new map (params: map_year, image_url)
+Create a new map
+
+**Parameters**
+
+|   Name    |  Type  | Description  | Example      |
+|:---------:|:------:|:------------:|:------------:|
+| map_year  | number | **Required** | `2010`
+| image_url | string | **Required** | `https://maps.com/2010.jpg`
 
 **Response**
 
     {
-
+      success: true,
+      code: 201,
+      message: 'Map created',
+      result: {
+        'map': {
+          _id: 1,
+          image_url: 'https://maps.com/2010.jpg',
+          map_year: 2010,
+          pois: [] // TODO: should we keep this? it will always be empty
+        }
+      }
     }
     
-**Endpoint**
+### Endpoint
 
     DELETE /maps/<map_id>
 
 **Description**
 
-Delete the specified map. 
+Delete the specified map
 
 **Response**
 
     {
-
+      success: true,
+      code: 200,
+      message: 'Map deleted',
+      result: {}
     }
 
 ## Stories
@@ -211,7 +273,7 @@ Delete the specified map.
 **Response**
 
     {
-
+    
     }
     
 **Endpoint**
@@ -227,6 +289,7 @@ Create a story (param: story_name)
     {
 
     }
+
 **Endpoint**
 
     PUT /stories/<story_id>
