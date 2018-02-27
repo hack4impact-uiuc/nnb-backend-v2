@@ -1,8 +1,9 @@
 from api import db
+from api.utils import Mixin
 from sqlalchemy.dialects.postgresql import JSON
 from flask_sqlalchemy import SQLAlchemy
 
-class POI(db.Model):
+class POI(Mixin, db.Model):
     __tablename__ = 'poi'
 
     id = db.Column(db.Integer, unique=True, primary_key=True)
@@ -21,7 +22,7 @@ class POI(db.Model):
     def __repr__(self):
         return '<name {}>'.format(self.name)
 
-class Media(db.Model):
+class Media(Mixin, db.Model):
     __tablename__ = 'media'
 
     id = db.Column(db.Integer, unique=True, primary_key=True) 
@@ -32,7 +33,7 @@ class Media(db.Model):
     def __repr__(self):
         return '<content_url {}>'.format(self.content_url)
 
-class Link(db.Model):
+class Link(Mixin, db.Model):
     __tablename__ = 'link'
 
     id = db.Column(db.Integer, unique=True, primary_key=True)
@@ -43,7 +44,7 @@ class Link(db.Model):
     def __repr__(self):
         return '<additional_links poi_id = {}>'.format(self.poi_id)
 
-class Map(db.Model):
+class Map(Mixin, db.Model):
     __tablename__ = 'map'
 
     id = db.Column(db.Integer, unique=True, primary_key=True) 
@@ -53,7 +54,7 @@ class Map(db.Model):
     def __repr__(self):
         return '<map {}>'.format(self.map_year)
 
-class Story(db.Model):
+class Story(Mixin, db.Model):
     __tablename__ = 'story'
     id = db.Column(db.Integer, unique=True, primary_key=True)
     story_name = db.Column(db.String, nullable=False)
@@ -64,7 +65,7 @@ class Story(db.Model):
     def __repr__(self):
         return '<story_names {}>'.format(self.story_name)
 
-class StoryPOI(db.Model):
+class StoryPOI(Mixin, db.Model):
     __tablename__ = 'story_poi'
     id = db.Column(db.Integer, unique=True, primary_key=True)
     story_id = db.Column(db.Integer, db.ForeignKey('story.id', ondelete='CASCADE'), nullable=True)
