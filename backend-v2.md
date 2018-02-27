@@ -40,7 +40,7 @@ POIS:
 * GET /pois/<poi_id>
 * POST /pois
 * PUT /pois/<poi_id>
-* DELETE /poits/<poi_id>
+* DELETE /pois/<poi_id>
 
 MAPS: 
 * GET /maps
@@ -199,7 +199,7 @@ Create a new POI and:
 | media       | [Media]  | Optional     | See Media parameters below                          | `[ <Media>, ... ]`
 | story_ids   | [number] | Optional     | ids of stories to add this POI to*                  | `[21, 22]`
 
-*Stories with given ids not gauranteed to exist
+*Stories with given ids not guaranteed to exist
 
 **Link Parameters**
 
@@ -281,7 +281,7 @@ Edit the data of a POI:
 | media       | [Media]  | Optional | See Media parameters below                   | `[ <Media>, ... ]`
 | story_ids   | [number] | Optional | ids of stories to this POI will belong to*   | `[21, 23]`
 
-*Stories with given ids not gauranteed to exist. The `story_id`s specified will replace the stories the POI was in before, i.e. the POI will end up being in just the stories corresponding to the given `story_ids`, regardless of the stories it was in before
+*Stories with given ids not guaranteed to exist. The specified `story_id`s will replace the stories the POI was in before, i.e. the POI will end up being in just the stories corresponding to the given `story_ids`, regardless of the stories it was in before
 
 **Link Parameters**
 
