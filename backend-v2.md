@@ -159,55 +159,21 @@ Get all map years
       result: {
         maps: [
           {
-            _id: 1,
+            _id: 11,
             image_url: 'https://maps.com/1969.jpg',
             map_year: 1969
           },
           {
-            _id: 2,
+            _id: 12,
             image_url: 'https://maps.com/2000.jpg',
             map_year: 2000
           },
           {
-            _id: 3,
+            _id: 13,
             image_url: 'https://maps.com/2018.jpg',
             map_year: 2018
           }
         ]
-      }
-    }
-    
-### Endpoint
-
-    GET /maps/<map_id>
-
-**Description**
-
-Get map model data and all POIs associated with the specified map (POI map_year == MAPS map_year)
-
-**Response**
-
-    {
-      success: true,
-      code: 200,
-      message: '',
-      result: {
-        'map': {
-          _id: 1,
-          image_url: 'https://maps.com/1969.jpg',
-          map_year: 1969,
-          pois: [
-            {
-
-            },
-            {
-
-            },
-            {
-
-            }
-          ]
-        }
       }
     }
     
@@ -221,7 +187,7 @@ Create a new map
 
 **Parameters**
 
-|   Name    |  Type  | Description  | Example      |
+|   Name    |  Type  | Required     | Example      |
 |:---------:|:------:|:------------:|:------------:|
 | map_year  | number | **Required** | `2010`
 | image_url | string | **Required** | `https://maps.com/2010.jpg`
@@ -234,7 +200,7 @@ Create a new map
       message: 'Map created',
       result: {
         'map': {
-          _id: 1,
+          _id: 14,
           image_url: 'https://maps.com/2010.jpg',
           map_year: 2010,
           pois: [] // TODO: should we keep this? it will always be empty
@@ -261,49 +227,109 @@ Delete the specified map
 
 ## Stories
 
-**Endpoint**
+### Endpoint
 
     GET /stories
 
 **Description**
 
 * Get list of story names 
-* Get list of stories a POI is in (query param)
+* Get list of stories a POI is in if given `poi_id`
+
+**Parameters**
+
+|   Name    |  Type  | Required     | Description                               | Example      |
+|:---------:|:------:|:------------:|:-----------------------------------------:|:------------:|
+| poi_id    | number | Optional     | Get list of stories that contain this POI | `1`
 
 **Response**
 
     {
-    
+      success: true,
+      code: 200,
+      message: '',
+      result: {
+        'stories': [
+            {
+              _id: 21,
+              story_name: 'Angad Goes to Wisconsin',
+            },
+            {
+              _id: 22,
+              story_name: 'Alvin Gets Lost in Taiwan',
+            },
+            {
+              _id: 23,
+              story_name: 'Jeffy Discovers the Dark Side of the Moon',
+            }
+        ]
+      }
     }
     
-**Endpoint**
+### Endpoint
 
     POST /stories
 
 **Description**
 
-Create a story (param: story_name)
+Create a story
+
+**Parameters**
+
+|   Name     |  Type    | Required     | Description                   |  Example                            |
+|:----------:|:--------:|:------------:|:-----------------------------:|:-----------------------------------:|
+| story_name | string   | **Required** | New story name                | `Andy Finishes Implementing Malloc`
+| poi_ids    | [number] | Optional     | Add these POIs to this story* | `[1,2]`
+
+*This will add to the `STORY_POI` table, but won't show up in the response of this endpoint
 
 **Response**
 
     {
-
+      success: true,
+      code: 201,
+      message: 'Story created',
+      result: {
+        'story': {
+          _id: 24,
+          story_name: 'Andy Finishes Implementing Malloc'
+        }
+      }
     }
 
-**Endpoint**
+### Endpoint
 
     PUT /stories/<story_id>
 
 **Description**
 
 Update story data:
-* edit story name (param: story_name)
-* add multiple POIs to a story (param: [poi_id])
+* edit story name
+* edit/add multiple POIs on a story
+
+**Note**: At least one of the following parameters is required:
+
+**Parameters**
+
+|   Name     |  Type    | Required                        | Description                              |  Example                            |
+|:----------:|:--------:|:-------------------------------:|:----------------------------------------:|:-----------------------------------:|
+| story_name | string   | **Required** if no `poi_id`     | New story name                           | `Just Kiddding Malloc Is Impossible`
+| poi_ids    | [number] | **Required** if no `story_name` | Replace the POIs on this story to these* | `[1,2,3]`
+
+*These `poi_ids` will replace the POIs on this story, i.e. the story will end up having just these `poi_ids`, regardless of the `poi_ids` it had before
 
 **Response**
 
     {
-
+      success: true,
+      code: 200,
+      message: 'Story updated',
+      result: {
+        'story': {
+          _id: 24,
+          story_name: 'Just Kidding Malloc Is Impossible'
+        }
+      }
     }
 
 **Endpoint**
@@ -312,11 +338,14 @@ Update story data:
 
 **Description**
 
-Delete the specified story with story_id. 
+Delete the story with the specified `story_id`
 
 **Response**
 
     {
-
+      success: true,
+      code: 200,
+      message: 'Story deleted',
+      result: {}
     }
 
