@@ -56,32 +56,67 @@ STORIES:
 
 ## POIs:
 
-**Endpoint**
+### Endpoint
 
     GET /pois
     
 **Description**
 
-Get all the POIs for a given map_year or story_id.
+Get all the POIs for a given `map_year` or `story_id`
 
-query params:
-* by map_year
-* by story_id
+**Note**: Exactly one of the following parameters should be provided. In other words, `map_year` XOR `story_id` must be true:
+
+**Parameters**
+
+|   Name    |  Type  | Required                      | Description               | Example      |
+|:---------:|:------:|:-----------------------------:|:-------------------------:|:------------:|
+| map_year  | number | **Required** if no `story_id` | Filter POIs by `map_year` | `1969`
+| story_id  | number | **Required** if no `map_year` | Filter POIs by `story_id` | `21`
 
 **Response**
-```
-{
-
-}
-```
-**Endpoint**
+    
+    {
+      success: true,
+      code: 200,
+      message: '',
+      result: {
+        pois: [
+          {
+            _id: 1,
+            name: 'Idea Lab',
+            date: Date(2018, 2, 27),
+            description: 'Theres no cell phone signal here',
+            map_year: 2018,
+            x_coord: 23,
+            y_coord: 67,
+            links: [ ... ],
+            media: [ ... ],
+            stories: [ ... ]
+          },
+          {
+            _id: 2,
+            name: 'Altgeld Hall',
+            date: Date(1969, 2, 27),
+            description: 'This building is ancient even for 1969',
+            map_year: 1969,
+            x_coord: 87,
+            y_coord: 21,
+            links: [ ... ],
+            media: [ ... ],
+            stories: [ ... ]
+          }
+        ]
+      }
+    }
+    
+### Endpoint
 
     GET /pois/<poi_id>
 
 **Description**
 
 Retrieve the data of a specified POI:
-* poi modal attributes
+* poi model attributes
 * links
 * media
 * stories
@@ -89,10 +124,57 @@ Retrieve the data of a specified POI:
 **Response**
 
     {
-
+      success: true,
+      code: 200,
+      message: '',
+      result: {
+        poi: {
+          _id: 1,
+          name: 'Idea Lab',
+          date: Date(2018, 2, 27),
+          description: 'Theres no cell phone signal here',
+          map_year: 2018,
+          x_coord: 23,
+          y_coord: 67,
+          links: [
+            {
+              _id: 41,
+              link_url: 'https://github.com',
+              display_name: 'Github' 
+            },
+            {
+              _id: 42,
+              link_url: 'https://google.com',
+              display_name: 'Google' 
+            }
+          ],
+          media: [
+            {
+              _id: 41,
+              content_url: 'https://images.com/koala.jpg',
+              caption: 'Koala' 
+            },
+            {
+              _id: 42,
+              content_url: 'https://images.com/armadillo.jpg',
+              caption: 'Armadillo' 
+            }
+          ],
+          stories: [
+            {
+              _id: 21,
+              story_name: 'Angad Goes to Wisconsin',
+            },
+            {
+              _id: 22,
+              story_name: 'Alvin Gets Lost in Taiwan',
+            }
+          ]
+        }
+      }
     }
     
-**Endpoint**
+### Endpoint
 
     POST /pois
 
@@ -108,7 +190,8 @@ Create a new POI and:
     {
 
     }
-**Endpoint**
+    
+### Endpoint
 
     PUT /pois/<poi_id>
 
@@ -126,7 +209,7 @@ Edit the data of a POI:
 
     }
 
-**Endpoint**
+### Endpoint
 
     DELETE /pois/<poi_id>
 
@@ -332,7 +415,7 @@ Update story data:
       }
     }
 
-**Endpoint**
+### Endpoint
 
     DELETE /stories/<story_id>
 
