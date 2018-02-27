@@ -181,14 +181,81 @@ Retrieve the data of a specified POI:
 **Description**
 
 Create a new POI and:
-* add POI to multiple stories
 * create multiple links
 * create multiple media
+* add POI to multiple stories
+
+**POI Parameters**
+
+|   Name      |  Type    | Required     | Description                                         | Example              |
+|:-----------:|:--------:|:------------:|:---------------------------------------------------:|:--------------------:|
+| name        | string   | **Required** | POI name                                            | `Himalayan Chimney`
+| date        | date     | Optional     | If not provided, default to `1/1/<map_year>`        | `Date(2018, 2, 27)`
+| description | string   | **Required** | POI description                                     | `Yum`
+| map_year    | number   | **Required** | year of map this POI lives on                       | `2018`
+| x_coord     | number   | **Required** | x coord on map image, **must be between 0 and 100** | `12`
+| y_coord     | number   | **Required** | y coord on map image, **must be between 0 and 100** | `43`
+| links       | [Link]   | Optional     | See Link parameters below                           | `[ <Link>, ... ]`
+| media       | [Media]  | Optional     | See Media parameters below                          | `[ <Media>, ... ]`
+| story_ids   | [number] | Optional     | ids of stories to add this POI to*                  | `[21, 22]`
+
+*Stories with given ids not gauranteed to exist
+
+**Link Parameters**
+
+|   Name       |  Type   | Required     | Description                                           | Example              |
+|:------------:|:-------:|:------------:|:-----------------------------------------------------:|:--------------------:|
+| link_url     | string  | **Required** | url of external link, should be validated client side | `http://fb.com`
+| display_name | string  | Optional     | display name of link                                  | `Facebook`
+
+**Media Parameters**
+
+|   Name      |  Type   | Required     | Description                            | Example                          |
+|:-----------:|:-------:|:------------:|:--------------------------------------:|:--------------------------------:|
+| content_url | string  | **Required** | url of externally hosted media content | `http://images.com/llama.jpg`
+| caption     | string  | Optional     | caption for media content              | `The Llama in its natural habitat`
 
 **Response**
 
     {
-
+      success: true,
+      code: 201,
+      message: 'POI created',
+      result: {
+        poi: {
+          _id: 3,
+          name: 'Himalayan Chimney',
+          date: Date(2018, 2, 27),
+          description: 'Yum',
+          map_year: 2018,
+          x_coord: 12,
+          y_coord: 43,
+          links: [
+            {
+              _id: 43,
+              link_url: 'http://fb.com',
+              display_name: 'Facebook' 
+            }
+          ],
+          media: [
+            {
+              _id: 41,
+              content_url: 'http://images.com/llama.jpg',
+              caption: 'The Llama in its natural habitat' 
+            }
+          ],
+          stories: [
+            {
+              _id: 21,
+              story_name: 'Angad Goes to Wisconsin',
+            },
+            {
+              _id: 22,
+              story_name: 'Alvin Gets Lost in Taiwan',
+            }
+          ]
+        }
+      }
     }
     
 ### Endpoint
@@ -198,15 +265,79 @@ Create a new POI and:
 **Description**
 
 Edit the data of a POI:
-* edit POI model attributes (name, date, description)
-* add/edit stories for this POI (param: [story_id])
-* edit links (param: [link_id])
-* edit media (param: [media_id])
+* edit POI model attributes (only name, date, description)
+* add/edit stories this POI is in
+* edit links
+* edit media
+
+**POI Parameters**
+
+|   Name      |  Type    | Required | Description                                  | Example              |
+|:-----------:|:--------:|:--------:|:--------------------------------------------:|:--------------------:|
+| name        | string   | Optional | POI name                                     | `Himalayan Chimney`
+| date        | date     | Optional | If not provided, default to `1/1/<map_year>` | `Date(2018, 2, 27)`
+| description | string   | Optional | POI description                              | `Yummy mmm mmm mmmm`
+| links       | [Link]   | Optional | See Link parameters below                    | `[ <Link>, ... ]`
+| media       | [Media]  | Optional | See Media parameters below                   | `[ <Media>, ... ]`
+| story_ids   | [number] | Optional | ids of stories to this POI will belong to*   | `[21, 23]`
+
+*Stories with given ids not gauranteed to exist. The `story_id`s specified will replace the stories the POI was in before, i.e. the POI will end up being in just the stories corresponding to the given `story_ids`, regardless of the stories it was in before
+
+**Link Parameters**
+
+|   Name       |  Type   | Required | Description                                           | Example              |
+|:------------:|:-------:|:--------:|:-----------------------------------------------------:|:--------------------:|
+| link_url     | string  | Optional | url of external link, should be validated client side | `http://facebook.com`
+| display_name | string  | Optional | display name of link                                  | `Facebook`
+
+**Media Parameters**
+
+|   Name      |  Type   | Required | Description                            | Example                          |
+|:-----------:|:-------:|:--------:|:--------------------------------------:|:--------------------------------:|
+| content_url | string  | Optional | url of externally hosted media content | `http://images.com/llama.jpg`
+| caption     | string  | Optional | caption for media content              | `The Llama in its natural habitat`
 
 **Response**
 
     {
-
+      success: true,
+      code: 200,
+      message: 'POI updated',
+      result: {
+        poi: {
+          _id: 3,
+          name: 'Himalayan Chimney',
+          date: Date(2018, 2, 27),
+          description: 'Yummy mmm mmm mmmm',
+          map_year: 2018,
+          x_coord: 12,
+          y_coord: 43,
+          links: [
+            {
+              _id: 43,
+              link_url: 'http://facebook.com',
+              display_name: 'Facebook' 
+            }
+          ],
+          media: [
+            {
+              _id: 41,
+              content_url: 'http://images.com/llama.jpg',
+              caption: 'The Llama in its natural habitat' 
+            }
+          ],
+          stories: [
+            {
+              _id: 21,
+              story_name: 'Angad Goes to Wisconsin',
+            },
+            {
+              _id: 23,
+              story_name: 'Jeffy Discovers the Dark Side of the Moon',
+            }
+          ]
+        }
+      }
     }
 
 ### Endpoint
@@ -215,12 +346,15 @@ Edit the data of a POI:
 
 **Description**
 
-Delete the specified POI. 
+Delete the specified POI
 
 **Response**
 
     {
-
+      success: true,
+      code: 200,
+      message: 'POI deleted',
+      result: {}
     }
     
 ## Maps
