@@ -34,7 +34,7 @@ def pois_get_by_map_year_or_story():
         pois = POI.query.join(StoryPOI, POI.id == StoryPOI.poi_id).filter(StoryPOI.story_id == int(story_id))
         if pois.count() == 0:
             return create_response(status=404, message='No POIs found')
-    # Find associated links, media, and stories of each POI, then create a list of the POIs
+    # Add associated links, media, and stories to each POI, then create a list of all POIs
     pois_list = [poi_links_media_stories(i.to_dict()) for i in pois]
     return create_response({'pois': pois_list})
 
@@ -64,14 +64,17 @@ def pois_post():
             return create_response(status=422, message='POI not created; story_id does not exist')
     # Check if date exists; default to Jan 1 of map_year
     data['date'] = data['date'] if data['date'] is not None else date(map_year, 1, 1)
-    # Add to POI, Link, Media, and StoryPOI tables in db
-    poi_id = db.session.query(func.max(POI.id)).scalar() + 1 # Gets the new poi_id
+    # Add to POI table in db
     poi_add = POI(name=data['name'],
                   date=data['date'],
                   description=data['description'],
                   map_year=data['map_year'],
                   x_coord=data['x_coord'],
                   y_coord=data['y_coord'])
+    db.session.add(poi_add)
+    db.session.commit()
+    # Add to Link, Media, and StoryPOI tables in db
+    poi_id = db.session.query(func.max(POI.id)).scalar() # poi_id of the new POI
     link_add = [Link(link_url=j['link_url'],
                      display_name=j['display_name'],
                      poi_id=poi_id) for j in data['links']]
@@ -80,12 +83,11 @@ def pois_post():
                        poi_id=poi_id) for k in data['media']]
     story_add = [StoryPOI(story_id=l,
                           poi_id=poi_id) for l in data['story_ids']]
-    db.session.add(poi_add)
     db.session.add_all(link_add)
     db.session.add_all(media_add)
     db.session.add_all(story_add)
     db.session.commit()
-    created_poi = POI.query.get(poi_id)  # Getting the newly created POI
+    created_poi = POI.query.get(poi_id)  # Getting the newly created POI for create_response
     response_data = {'poi': poi_links_media_stories(created_poi.to_dict())}
     return create_response(data=response_data, status=201, message='POI created')
 
@@ -96,4 +98,7 @@ def pois_put(poi_id):
 
 @app.route('/pois/<poi_id>', methods=['DELETE'])
 def pois_delete(poi_id):
-    return create_response(data)
+    poi_to_delete = POI.query.get(poi_id)
+    db.session.delete(poi_to_delete)
+    db.session.commit()
+    return create_response(message='POI deleted')
