@@ -5,33 +5,33 @@
 **POI**
 
 |   id   |  name  | date | description | map_year | x_coord | y_coord |
-|:--------:|:------:|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|  
+|:------:|:------:|:----:|:-----------:|:--------:|:-------:|:-------:|  
 
 
 **MEDIA**
 
 |   id   |  poi_id | content_url | caption |  
-|:--------:|:------:|:-----------:|:-----------:|
+|:------:|:-------:|:-----------:|:-------:|
 
 **LINK**
 
-|   id   |  poi_id | link_url| display_name |
-|:--------:|:------:|:-----------:|:-----------:|
+|   id   |  poi_id | link_url | display_name |
+|:------:|:-------:|:--------:|:------------:|
 
 **MAP**
 
-|   id   |  image_url | map_year | 
-|:--------:|:------:|:-----------:|
+|   id   | image_url | map_year | 
+|:------:|:---------:|:--------:|
 
 **STORY**
 
 |   id   |  story_name |
-|:--------:|:------:|
+|:------:|:-----------:|
 
 **STORY_POI**
 
 |   id   |  story_id | poi_id | 
-|:--------:|:------:|:-----------:|
+|:------:|:---------:|:-------:|
 
 ## Endpoints Documentation 
 
@@ -44,7 +44,6 @@ POIS:
 
 MAPS: 
 * GET /maps
-* GET /maps/<map_id>
 * POST /maps
 * DELETE /maps
 
@@ -53,6 +52,13 @@ STORIES:
 * POST /stories
 * PUT /stories/<story_id>
 * DELETE /stories/<story_id>
+
+## Conventions
+This API will follow the [H4I REST API Spec](https://github.com/hack4impact-uiuc/wiki/wiki/Our-REST-API-Specification).
+
+All `GET` request parameters should be query parameters.
+
+All `POST` and `PUT` request parameters should be body parameters.
 
 ## POIs:
 
