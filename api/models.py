@@ -15,9 +15,9 @@ class POI(Mixin, db.Model):
     y_coord = db.Column(db.Float, nullable=False)
 
     #One-to-many relationships
-    media = db.relationship('Media', backref='poi')
-    links = db.relationship('Link', backref='poi')
-    story_pois = db.relationship('StoryPOI', backref='poi')
+    media = db.relationship('Media', cascade="all, delete-orphan")
+    links = db.relationship('Link', cascade="all, delete-orphan")
+    story_pois = db.relationship('StoryPOI', cascade="all, delete-orphan")
 
     def __repr__(self):
         return '<name {}>'.format(self.name)
@@ -60,7 +60,7 @@ class Story(Mixin, db.Model):
     story_name = db.Column(db.String, nullable=False)
 
     #One-to-many relationship
-    story_pois = db.relationship('StoryPOI', backref='story')
+    story_pois = db.relationship('StoryPOI', cascade="all, delete-orphan")
 
     def __repr__(self):
         return '<story_names {}>'.format(self.story_name)

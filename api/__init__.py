@@ -18,3 +18,6 @@ db.session.commit()
 # import and register blueprints
 from api.views import main
 app.register_blueprint(main.mod)
+
+from api.views import pois
+app.register_blueprint(pois.mod)
