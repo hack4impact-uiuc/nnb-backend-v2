@@ -1,7 +1,6 @@
 from api import app, db
 from api.models import POI, Media, Link, Story, StoryPOI
 from api.utils import create_response, row_constructor
-from sqlalchemy.sql.expression import func
 from flask import Blueprint, request, jsonify
 import json
 from datetime import date
@@ -99,6 +98,8 @@ def pois_put(poi_id):
 @app.route('/pois/<poi_id>', methods=['DELETE'])
 def pois_delete(poi_id):
     poi_to_delete = POI.query.get(poi_id)
+    if poi_to_delete is None:
+        return create_response(status=404, message='No POI found')
     db.session.delete(poi_to_delete)
     db.session.commit()
     return create_response(message='POI deleted')
