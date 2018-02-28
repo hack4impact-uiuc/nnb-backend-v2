@@ -24,6 +24,14 @@ def create_response(data={}, status=200, message=''):
     }
     return jsonify(response), status
 
+def row_constructor(RowClass, row_dict={}, **kwargs):
+    """
+    Creates a new row by making a new instance of RowClass out of row_dict and kwargs
+    Ignores key-value pairs with list values
+    """
+    valid_row_dict = dict((key, val) for key, val in row_dict.items() if type(val) is not list)
+    return RowClass(**valid_row_dict, **kwargs)
+
 class Mixin():
 
     def to_dict(self):
