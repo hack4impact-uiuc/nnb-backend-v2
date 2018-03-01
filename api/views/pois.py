@@ -1,6 +1,7 @@
 from api import app, db
 from api.models import POI, Media, Link, Story, StoryPOI
-from api.utils import create_response, row_constructor
+from api.utils import create_response
+#from api.utils import row_constructor
 from flask import Blueprint, request, jsonify
 import json
 from datetime import date
@@ -65,7 +66,7 @@ def pois_post():
     # Check if story exists for each story_id
     for _id in data['story_ids']:
         if Story.query.get(_id) is None:
-            return create_response(status=422, message='POI not created; story_id does not exist')
+            return create_response(status=422, message='POI not created; story_id {} does not exist'.format(_id))
 
     # Check if date exists; default to Jan 1 of map_year
     data['date'] = data['date'] if data['date'] is not None else date(map_year, 1, 1)
@@ -92,8 +93,39 @@ def pois_post():
 
 @app.route('/pois/<poi_id>', methods=['PUT'])
 def pois_put(poi_id):
+    poi_by_id = POI.query.get(int(poi_id))
+    if poi_by_id is None:
+        return create_response(status=404, message='No POI found')
     data = request.get_json()
-    return create_response(data)
+    if 'name' is in data:
+        poi_by_id.name = data['name']
+    if 'date' is in data:
+        poi_by_id.date = parse(data['date'])
+    if 'description' is in data:
+        poi_by_id.description = data['description']
+    if 'story_ids' is in data:
+        for i in data['story_ids']:
+            if Story.query.get(i) is None:
+                return create_response(status=422, message='POI not created; story_id {} does not exist'.format(i))
+        for j in StoryPOI.query.filter(StoryPOI.poi_id == poi_id):
+            db.session.delete(j)
+        story_add = [row_constructor(StoryPOI, story_id=_id, poi_id=poi_id) for _id in data['story_id']]
+    if 'media' is in data:
+        for i in Media.query.filter(Media.poi_id == poi_id):
+            db.session.delete(i)
+        media_add = [row_constructor(Media, k, poi_id=poi_id) for k in data['media']]
+    if 'links' is in data:
+        for i in Link.query.filter(Link.poi_id == poi_id):
+            db.session.delete(i)
+        link_add = [row_constructor(Link, j, poi_id=poi_id) for j in data['links']]
+    db.session.add_all(story_add)
+    db.session.add_all(media_add)
+    db.session.add_all(link_add)
+    db.session.commit()
+    #Can I just use pois_by_id?
+    edited_poi = POI.query.get(int(poi_id))
+    response_data = {'poi': poi_links_media_stories(edited_poi.to_dict())}
+    return create_response(response_data, 201, 'POI edited')
 
 @app.route('/pois/<poi_id>', methods=['DELETE'])
 def pois_delete(poi_id):
