@@ -40,19 +40,28 @@ def post_stories():
     db.session.commit()
     story_dict = new_story.to_dict()
     story_dict['id'] = new_story.id
-    return create_response({'story': story_dict})
+    return create_response(data = {'story': story_dict}, message = 'Story created')
 
-#
-# nums = [1,2,3]
-#
-# new_list = []
-# for i in l:
-#     new_list.append(i + 1)
-#
-# [i + 1 for i in nums if i % 2 == 1]
+ @app.route(STORIES_PARAM, methods=['PUT'])
+def put_stories(story_id):
+    data = request.get_json()
+    new_story_name = data['story_name'] if 'story_name' in data else ''
+    new_poi_ids = data['poi_ids'] if 'poi_ids' in data else []
+    story = Story.query.get(story_id)
+    if(len(new_story_name) != 0):
+    	story.story_name = new_storm_name
+    StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
+    if(len(new_poi_ids) != 0):
+    	for i in new_poi_ids:
+    		new_story_poi = StoryPOI(story_id = story_id, poi_id = i)
+    		db.session.add(new_story_poi)
+    db.session.commit()
+    return create_response(data = {'story': story.to_dict()}, message = 'Story updated')
 
 
-
-# @app.route(STORIES, methods=['PUT'])
-# def put_stories():
-#     data = request.get_json()
+@app.route(STORIES_PARAM, methods = ['DELETE'])
+def delete_stories(story_id):
+	Story.query.filter(Story.story_id == story_id).delete()
+	StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
+	db.session.commit()
+	return create_response(message = 'Story deleted')
