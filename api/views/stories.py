@@ -21,21 +21,38 @@ def get_stories():
         else:
             return create_response({'stories':stories})
     else:
-        return create_response({'stories':Story.query.all()})
+        stories = Story.query.all()
+        return create_response({'stories': [s.to_dict() for s in stories]})
 
 @app.route(STORIES, methods=['POST'])
 def post_stories():
-	new_story = Story(story_name = request.args.get('story_name'))
-	db.session.add(new_story)
-	if(not request.args.get('poi_ids') == False):
-		ids = request.args.get('poi_ids')
-		for id in ids:
-			new_story_poi = StoryPOI(story_id = new_story.id, poi_id = id)
-			db.session.add(new_story_poi)
-	db.session.commit()
-	return create_reponse({'story': new_story})
-
-
-@app.route(STORIES, methods=['PUT'])
-def put_stories():
     data = request.get_json()
+    new_story = Story(story_name = data['story_name'])
+    db.session.add(new_story)
+    db.session.flush()
+
+    data['poi_ids'] = data['poi_ids'] if 'poi_ids' in data else []
+    if(len(data['poi_ids']) != 0):
+        ids = data['poi_ids']
+        for i in ids:
+            new_story_poi = StoryPOI(story_id = new_story.id, poi_id = i)
+            db.session.add(new_story_poi)
+    db.session.commit()
+    story_dict = new_story.to_dict()
+    story_dict['id'] = new_story.id
+    return create_response({'story': story_dict})
+
+#
+# nums = [1,2,3]
+#
+# new_list = []
+# for i in l:
+#     new_list.append(i + 1)
+#
+# [i + 1 for i in nums if i % 2 == 1]
+
+
+
+# @app.route(STORIES, methods=['PUT'])
+# def put_stories():
+#     data = request.get_json()
