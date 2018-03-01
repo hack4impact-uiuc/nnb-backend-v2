@@ -1,7 +1,6 @@
 from api import app, db
 from api.models import POI, Media, Link, Story, StoryPOI
-from api.utils import create_response
-#from api.utils import row_constructor
+from api.utils import create_response, row_constructor
 from flask import Blueprint, request, jsonify
 import json
 from datetime import date
@@ -69,7 +68,7 @@ def pois_post():
             return create_response(status=422, message='POI not created; story_id {} does not exist'.format(_id))
 
     # Check if date exists; default to Jan 1 of map_year
-    data['date'] = data['date'] if data['date'] is not None else date(map_year, 1, 1)
+    data['date'] = parse(data['date']) if data['date'] is not None else date(map_year, 1, 1)
 
     # Add to POI table in db
     poi_add = row_constructor(POI, data)
