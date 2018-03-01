@@ -53,6 +53,9 @@ def pois_post():
     data = request.get_json()
 
     # Check that all required parameters exist
+    data['links'] = data['links'] if 'links' in data else []
+    data['media'] = data['media'] if 'media' in data else []
+    data['story_ids'] = data['story_ids'] if 'story_ids' in data else []
     if not all(i in data for i in ('name', 'description', 'map_year', 'x_coord', 'y_coord')):
         return create_response(status=422, message='POI not created; missing required input parameter(s)')
     for j in data['links']:
@@ -68,7 +71,7 @@ def pois_post():
             return create_response(status=422, message='POI not created; story_id {} does not exist'.format(_id))
 
     # Check if date exists; default to Jan 1 of map_year
-    data['date'] = parse(data['date']) if data['date'] is not None else date(map_year, 1, 1)
+    data['date'] = parse(data['date']) if 'date' in data else date(data['map_year'], 1, 1)
 
     # Add to POI table in db
     poi_add = row_constructor(POI, data)
@@ -96,32 +99,36 @@ def pois_put(poi_id):
     if poi_by_id is None:
         return create_response(status=404, message='No POI found')
     data = request.get_json()
-    if 'name' is in data:
+
+    # Edit poi columns
+    if 'name' in data:
         poi_by_id.name = data['name']
-    if 'date' is in data:
+    if 'date' in data:
         poi_by_id.date = parse(data['date'])
-    if 'description' is in data:
+    if 'description' in data:
         poi_by_id.description = data['description']
-    if 'story_ids' is in data:
+    
+    # Replace all links, media, and story_id if they were given
+    if 'links' in data:
+        for i in Link.query.filter(Link.poi_id == poi_id):
+            db.session.delete(i)
+        link_add = [row_constructor(Link, j, poi_id=poi_id) for j in data['links']]
+        db.session.add_all(link_add)
+    if 'media' in data:
+        for i in Media.query.filter(Media.poi_id == poi_id):
+            db.session.delete(i)
+        media_add = [row_constructor(Media, j, poi_id=poi_id) for j in data['media']]
+        db.session.add_all(media_add)
+    if 'story_ids' in data:
         for i in data['story_ids']:
             if Story.query.get(i) is None:
                 return create_response(status=422, message='POI not created; story_id {} does not exist'.format(i))
         for j in StoryPOI.query.filter(StoryPOI.poi_id == poi_id):
             db.session.delete(j)
-        story_add = [row_constructor(StoryPOI, story_id=_id, poi_id=poi_id) for _id in data['story_id']]
-    if 'media' is in data:
-        for i in Media.query.filter(Media.poi_id == poi_id):
-            db.session.delete(i)
-        media_add = [row_constructor(Media, k, poi_id=poi_id) for k in data['media']]
-    if 'links' is in data:
-        for i in Link.query.filter(Link.poi_id == poi_id):
-            db.session.delete(i)
-        link_add = [row_constructor(Link, j, poi_id=poi_id) for j in data['links']]
-    db.session.add_all(story_add)
-    db.session.add_all(media_add)
-    db.session.add_all(link_add)
+        story_add = [row_constructor(StoryPOI, story_id=_id, poi_id=poi_id) for _id in data['story_ids']]
+        db.session.add_all(story_add)
     db.session.commit()
-    #Can I just use pois_by_id?
+    
     edited_poi = POI.query.get(int(poi_id))
     response_data = {'poi': poi_links_media_stories(edited_poi.to_dict())}
     return create_response(response_data, 201, 'POI edited')
