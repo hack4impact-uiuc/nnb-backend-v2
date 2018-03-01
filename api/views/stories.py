@@ -9,9 +9,10 @@ from dateutil.parser import parse
 
 mod = Blueprint('stories', __name__)
 
-GET_STORIES = "/stories"
+STORIES = "/stories"
+STORIES_PARAM = "/stories/<story_id>"
 
-@app.route(GET_STORIES, methods=['GET'])
+@app.route(STORIES, methods=['GET'])
 def get_stories():
     if 'POI' in request.args:
         stories = StoryPOI.query.filter(StoryPOI.poi_id == request.args.get('POI'))
@@ -21,3 +22,7 @@ def get_stories():
             return create_response({'stories':stories})
     else:
         return create_response({'stories':Story.query.all()})
+
+@app.route(STORIES, methods=['PUT'])
+def put_stories():
+    data = request.get_json()
