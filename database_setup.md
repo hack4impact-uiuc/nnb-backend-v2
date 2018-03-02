@@ -60,7 +60,7 @@ testdb=# \dt
 ```
 
 ### Create the tables!
-This is the important part. Open a new terminal and change to the backend directory. Now we will run the following commands:
+This is the important part. Open a new terminal and change to the backend directory. Make sure you are in your virtual env otherwise you will get import errors! Now we will run the following commands:
 
 ```
 $ python manage.py db init
