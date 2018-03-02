@@ -37,7 +37,7 @@ You should see this:
 postgres=#
 ```
 
-### Step 2: Check that your database exists
+### Step 2: Check that your database exists and connect to it
 
 In your postgres terminal, type \list which should list out your databases. You should see testdb in here if you followed the steps in the prereqs.
 ```
@@ -59,7 +59,7 @@ Finally, run the \dt command which will display tables. You should see something
 testdb=# \dt 
 ```
 
-### Create the tables!
+### Step 3: Create the tables!
 This is the important part. Open a new terminal and change to the backend directory. Make sure you are in your virtual env otherwise you will get import errors! Now we will run the following commands:
 
 ```
