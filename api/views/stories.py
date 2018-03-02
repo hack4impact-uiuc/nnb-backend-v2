@@ -42,26 +42,32 @@ def post_stories():
     story_dict['id'] = new_story.id
     return create_response(data = {'story': story_dict}, message = 'Story created')
 
- @app.route(STORIES_PARAM, methods=['PUT'])
+@app.route(STORIES_PARAM, methods=['PUT'])
 def put_stories(story_id):
     data = request.get_json()
     new_story_name = data['story_name'] if 'story_name' in data else ''
     new_poi_ids = data['poi_ids'] if 'poi_ids' in data else []
     story = Story.query.get(story_id)
     if(len(new_story_name) != 0):
-    	story.story_name = new_storm_name
+    	story.story_name = new_story_name
     StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
     if(len(new_poi_ids) != 0):
     	for i in new_poi_ids:
     		new_story_poi = StoryPOI(story_id = story_id, poi_id = i)
     		db.session.add(new_story_poi)
+    db.session.flush()
     db.session.commit()
     return create_response(data = {'story': story.to_dict()}, message = 'Story updated')
 
 
 @app.route(STORIES_PARAM, methods = ['DELETE'])
 def delete_stories(story_id):
-	Story.query.filter(Story.story_id == story_id).delete()
-	StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
-	db.session.commit()
-	return create_response(message = 'Story deleted')
+    to_delete = Story.query.get(story_id)
+    db.session.delete(to_delete)
+    StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
+    # Tried a different way to delete story pois but not working atm
+    # to_delete = StoryPOI.query.filter(story_id == story_id).fetch()
+    # for s in to_delete:
+    #     db.session.delete(s)
+    db.session.commit()
+    return create_response(message = 'Story deleted')
