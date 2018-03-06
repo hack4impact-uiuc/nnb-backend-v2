@@ -7,7 +7,7 @@ from datetime import date
 from dateutil.parser import parse
 
 POIS_URL = '/pois'
-POIS_ID_URL = '/pois/<poi_id>'
+POIS_ID_URL = '/pois/<int:poi_id>'
 
 mod = Blueprint('pois', __name__)
 
