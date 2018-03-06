@@ -83,7 +83,7 @@ class POITests(unittest.TestCase):
         #Future Testing needed for links, media, stories (would require several loops based on json response)
 
     def test_create_poi(self):
-
+        pass
 
     def test_update_poi(self):
         pass
