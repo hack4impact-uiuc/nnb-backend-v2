@@ -48,7 +48,7 @@ def get_pois():
 
 @app.route(POIS_ID_URL, methods=['GET'])
 def get_poi_by_id(poi_id):
-    poi = POI.query.get(int(poi_id))
+    poi = POI.query.get(poi_id)
     if poi is None:
         return create_response(status=404, message='POI not found')
     poi_result = poi_links_media_stories(poi.to_dict())
@@ -107,7 +107,7 @@ def create_poi():
 
 @app.route(POIS_ID_URL, methods=['PUT'])
 def update_poi(poi_id):
-    poi = POI.query.get(int(poi_id))
+    poi = POI.query.get(poi_id)
     if poi is None:
         return create_response(status=404, message='POI not found')
     data = request.get_json()
@@ -144,7 +144,7 @@ def update_poi(poi_id):
         db.session.add_all(story_add)
     db.session.commit()
 
-    edited_poi = POI.query.get(int(poi_id))
+    edited_poi = POI.query.get(poi_id)
     response_data = {'poi': poi_links_media_stories(edited_poi.to_dict())}
     return create_response(response_data, 201, 'POI edited')
 
