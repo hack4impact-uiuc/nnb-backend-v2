@@ -83,113 +83,13 @@ class POITests(unittest.TestCase):
         #Future Testing needed for links, media, stories (would require several loops based on json response)
 
     def test_create_poi(self):
-        
+
 
     def test_update_poi(self):
         pass
 
     def test_delete_poi(self):
         pass
-
-    # def test_add_poi(self):
-    #     r = requests.post('http://127.0.0.1:5000/pois', data=json.dumps(poi_add_json))
-    #     self.assertEqual(r.status_code,200)
-    #     json_dict = r.json()
-    #     print(json_dict)
-    #     self.assertEqual(json_dict["status"], "success")
-    #
-    # def test_add_multiple_poi(self):
-    #
-    #     r = requests.post('http://127.0.0.1:5000/pois', data=json.dumps(poi_add_json))
-    #     r = requests.post('http://127.0.0.1:5000/pois', data=json.dumps(poi_add_json))
-    #
-    #
-    # def test_get_poi_by_id(self):
-    #     r = requests.get('http://127.0.0.1:5000/pois/60')
-    #     self.assertEqual(r.status_code,200)
-    #     json_dict = r.json()
-    #     poi = PointsOfInterest.query.get(60)
-    #     print("POI name")
-    #     print(poi)
-    #     name = poi.name
-    #     print(name)
-    #     self.assertEqual(json_dict['data'][0]["name"], name)
-    #
-    # def test_delete_poi(self):
-    #     r2 = requests.post('http://127.0.0.1:5000/pois', data=json.dumps(poi_add_json))
-    #     self.assertEqual(r.status_code,200)
-    #     json_dict = r2.json()
-    #     ID = json_dict['data']['id']
-    #     r = requests.delete('http://127.0.0.1:5000/pois/' + ID)
-    #     self.assertEqual(r.status_code,200)
-    #     json_dict = r.json()
-    #     self.assertEqual(json_dict['status'], "success")
-    # def get_poi_with_id(self):
-
-
-# app = Flask(__name__)
-# with app.app_context():
-#     r = requests.post(url = "http://127.0.0.1:5000/",params=jsonify({'username':'admin', 'password': 'admin'}))
-
-# class BasicTests(unittest.TestCase):
-#     def setUp(self):
-#         app.config['TESTING'] = True
-#         app.config['WTF_CSRF_ENABLED'] = False
-#         app.config['DEBUG'] = False
-#         app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://nbb:password@127.0.0.1:5432/nbb_db'
-#         self.app = app.test_client()
-
-#         db.drop_all()
-#         db.create_all()
-
-#         # Disable sending emails during unit testing
-#         # mail.init_app(app)
-#         self.assertEqual(app.debug, False)
-
-#     # executed after each test
-#     def tearDown(self):
-#         pass
-
-
-
-#     def test_main_page(self):
-#         response = self.app.get('/', follow_redirects=True)
-#         self.assertEqual(response.status_code, 200)
-#         result = self.app.get('/pois')
-#         client = app.test_client()
-#         # client.post('/signup',
-#         #     jsonify({'username':'admin', 'password': 'admin'})
-#         # )
-#         # client.post('/signup', data=dict(
-#         #     username="admin",
-#         #     password="admin"
-#         # ), follow_redirects=True)
-
-#     def register(self, username, password):
-#         return "HI"
-#         return self.app.post(
-#         '/signup',
-#         data=dict(username=username, password=password),
-#         follow_redirects=True
-#     )
-
-#     def login(self, username, password):
-#         return self.app.post(
-#             '/login',
-#             data=dict(username=username, password=password),
-#             follow_redirects=True
-#         )
-
-#     def logout(self):
-#         return self.app.get(
-#             '/logout',
-#             follow_redirects=True
-#         )
-
-#     def test_valid_user_registration(self):
-#         response = self.register("patkennedy79@gmail.com", "FlaskIsAwesome")
-#         # self.assertEqual(response.status_code, 200)
-#         # self.assertIn(b'Thanks for registering!', response.data)
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(POITests)
