@@ -8,12 +8,11 @@ from sqlalchemy import func
 # from datetime import date
 # import uuid
 from flask_sqlalchemy import SQLAlchemy
-from api.utils import create_response
+from api.utils import create_response, row_constructor
 
 
 
 mod = Blueprint('maps', __name__)
-
 
 #none of these have been comprehsnsively tested yet
 
