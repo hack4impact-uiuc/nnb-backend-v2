@@ -1,33 +1,34 @@
 from api import app, db
-from flask import Blueprint, request, jsonify
 from api.models import Map
+from api.utils import create_response, row_constructor
+from flask import Blueprint, request, jsonify
 import json
 #from api.utils import InvalidUsage
-from sqlalchemy import func
+# from sqlalchemy import func
 # import time
 # from datetime import date
 # import uuid
-from flask_sqlalchemy import SQLAlchemy
-from api.utils import create_response, row_constructor
+# from flask_sqlalchemy import SQLAlchemy
 
-
+MAPS_URL = '/maps'
+MAPS_ID_URL = '/maps/<int:map_id>'
 
 mod = Blueprint('maps', __name__)
 
 #none of these have been comprehsnsively tested yet
 
-@app.route('/maps', methods = ['GET'])
 # Get all map years.
 # get function is definitely not functional
+@app.route(MAPS_URL, methods = ['GET'])
 def get_map_years():
     data_in = to_dict(Map.query.all())
-	year_list = []
-	for k in data_in.keys():
-	    year_list.append(data_in[k].map_year)
+    year_list = []
+    for k in data_in.keys():
+        year_list.append(data_in[k].map_year)
     return create_response(data = year_list)
 
-@app.route('/maps', methods = ['POST'])
 # Post a Map
+@app.route(MAPS_URL, methods = ['POST'])
 def create_map():
     data = request.get_json()
     if data is None:
@@ -47,7 +48,7 @@ def create_map():
     db.session.commit()
     return create_response(created_map, message = 'Post successful')
 
-@app.route('/maps/<map_id>', methods = ['DELETE'])
+@app.route(MAPS_ID_URL, methods = ['DELETE'])
 def delete_map(map_id):
     map_obj = Map.query.get(map_id)
     if map_obj is None:
@@ -56,7 +57,6 @@ def delete_map(map_id):
         db.session.delete(map_obj)
         db.session.commit()
         return create_response(status = 200, message = 'Map delete successful')
-
     # data_list_id = filter(lambda x: x.id, Map.query.all())
     # if map_id not in data_list_id:
     #     return create_response(status = 402, message = 'ID not Found')
