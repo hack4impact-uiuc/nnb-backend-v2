@@ -18,9 +18,8 @@ def get_map_years():
 def create_map():
     data = request.get_json()
     fields = ['image_url', 'map_year']
-    map_info = [data.get(field) for field in fields]
-    if None in map_info:
-        missing_params = filter(lambda x: data.get(x) == None, fields)
+    missing_params = [field for field in fields if data.get(field) is None]
+    if len(missing_params):
         message = 'Missing parameters ' + ', '.join(missing_params)
         return create_response(data, 400, message)
 
