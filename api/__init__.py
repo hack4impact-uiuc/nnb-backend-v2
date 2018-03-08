@@ -21,3 +21,6 @@ app.register_blueprint(main.mod)
 
 from api.views import pois
 app.register_blueprint(pois.mod)
+
+from api.views import maps
+app.register_blueprint(maps.mod)

@@ -1,5 +1,5 @@
 from api import app, db
-from api.models import Map
+from api.models import Map, POI
 from api.utils import create_response, row_constructor
 from flask import Blueprint, request, jsonify
 import json
@@ -17,46 +17,40 @@ mod = Blueprint('maps', __name__)
 
 #none of these have been comprehsnsively tested yet
 
-# Get all map years.
-# get function is definitely not functional
+# Get all maps.
 @app.route(MAPS_URL, methods = ['GET'])
 def get_map_years():
-    data_in = to_dict(Map.query.all())
-    year_list = []
-    for k in data_in.keys():
-        year_list.append(data_in[k].map_year)
-    return create_response(data = year_list)
+    maps = [m.to_dict() for m in Map.query.all()]
+    return create_response({'maps' : maps})
 
 # Post a Map
 @app.route(MAPS_URL, methods = ['POST'])
 def create_map():
     data = request.get_json()
-    if data is None:
-        return create_response(status = 400, message = 'failed to enter any data')
-    map_year = data.get('map_year')
-    image_url = data.get('image_url')
-    if image_url is None:
-        return create_response(status = 400, message = 'no image_url entered')
-    if map_year is None:
-        return create_response(status = 400, message = 'no map_year entered')
-    # original code implementation -> created_map = Maps(
-    #    image_url = (json_dict['image_url']),
-    #    map_year = (int)(json_dict['year'])
-    #)
-    created_map = row_constructor(image_url, map_year)
-    db.session.add(created_map)
-    db.session.commit()
-    return create_response(created_map, message = 'Post successful')
+    fields = ['image_url', 'map_year']
+    map_info = [data.get(field) for field in fields]
+    if None in map_info:
+        missing_params = filter(lambda x: data.get(x) == None, fields)
+        message = 'Missing parameters ' + ', '.join(missing_params)
+        return create_response(data, 400, message)
+    else:
+        created_map = row_constructor(Map, data)
+        db.session.add(created_map)
+        db.session.flush()
+        map_id = created_map.id
+        db.session.commit()
+        return create_response({'map' : Map.query.get(map_id).to_dict()}, 201, 'Map created')
 
+# delete map and all associated POIs
 @app.route(MAPS_ID_URL, methods = ['DELETE'])
 def delete_map(map_id):
     map_obj = Map.query.get(map_id)
     if map_obj is None:
-        return create_response(status = 404, message = 'ID not found')
+        return create_response(status = 404, message = 'Map id ' + str(map_id) + ' not found')
     else:
+        poi_list = POI.query.filter(POI.map_year == map_obj.map_year)
+        for poi in poi_list:
+            db.session.delete(poi)
         db.session.delete(map_obj)
         db.session.commit()
-        return create_response(status = 200, message = 'Map delete successful')
-    # data_list_id = filter(lambda x: x.id, Map.query.all())
-    # if map_id not in data_list_id:
-    #     return create_response(status = 402, message = 'ID not Found')
+        return create_response(status = 200, message = 'Map deleted')
