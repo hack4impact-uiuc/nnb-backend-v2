@@ -1,6 +1,6 @@
 from api import app, db
 from api.models import Story, StoryPOI
-from api.utils import create_response
+from api.utils import create_response, row_constructor
 from flask import Blueprint, request
 
 mod = Blueprint('stories', __name__)
@@ -42,15 +42,12 @@ def put_stories(story_id):
     if 'story_name' in data:
         story.story_name = data['story_name']
     if 'poi_ids' in data:
+        StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
         if(len(data['poi_ids']) > 0):
-            for i in new_poi_ids:
-                new_story_pois = [row_constructor(StoryPOI, story_id = story_id, poi_id = poi_id) for poi_id in data['poi_ids']]
-                db.session.add_all(new_story_pois)
-        else:
-            StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
+            new_story_pois = [row_constructor(StoryPOI, story_id = story_id, poi_id = poi_id) for poi_id in data['poi_ids']]
+            db.session.add_all(new_story_pois)
     db.session.commit()
     return create_response(data = {'story': story.to_dict()}, message = 'Story updated')
-    
 
 @app.route(STORIES_ID_URL, methods = ['DELETE'])
 def delete_stories(story_id):
