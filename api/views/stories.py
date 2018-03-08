@@ -31,10 +31,8 @@ def post_stories():
         new_story_pois = [row_constructor(StoryPOI, story_id=new_story.id, poi_id=poi_id) for poi_id in data['poi_ids']]
         db.session.add_all(new_story_pois)
     db.session.commit()
-    story_dict = {}
-    story_dict['_id'] = new_story.id
-    story_dict['story_name'] = new_story.story_name
-    return create_response(data = {'story': story_dict}, message = 'Story created')
+    story = Story.query.get(new_story.id)
+    return create_response(data = {'story': story.to_dict()}, message = 'Story created')
 
 @app.route(STORIES_ID_URL, methods=['PUT'])
 def put_stories(story_id):
@@ -48,10 +46,7 @@ def put_stories(story_id):
             new_story_pois = [row_constructor(StoryPOI, story_id = story_id, poi_id = poi_id) for poi_id in data['poi_ids']]
             db.session.add_all(new_story_pois)
     db.session.commit()
-    story_dict = {}
-    story_dict['_id'] = story.id
-    story_dict['story_name'] = story.story_name
-    print(story.to_dict())
+    story = Story.query.get(story_id)
     return create_response(data = {'story': story.to_dict()}, message = 'Story updated')
 
 @app.route(STORIES_ID_URL, methods = ['DELETE'])
