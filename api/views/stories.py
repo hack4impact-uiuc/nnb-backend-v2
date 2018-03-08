@@ -31,8 +31,9 @@ def post_stories():
         new_story_pois = [row_constructor(StoryPOI, story_id=new_story.id, poi_id=poi_id) for poi_id in data['poi_ids']]
         db.session.add_all(new_story_pois)
     db.session.commit()
-    story_dict = new_story.to_dict()
-    story_dict['id'] = new_story.id
+    story_dict = {}
+    story_dict['_id'] = new_story.id
+    story_dict['story_name'] = new_story.story_name
     return create_response(data = {'story': story_dict}, message = 'Story created')
 
 @app.route(STORIES_ID_URL, methods=['PUT'])
@@ -47,6 +48,10 @@ def put_stories(story_id):
             new_story_pois = [row_constructor(StoryPOI, story_id = story_id, poi_id = poi_id) for poi_id in data['poi_ids']]
             db.session.add_all(new_story_pois)
     db.session.commit()
+    story_dict = {}
+    story_dict['_id'] = story.id
+    story_dict['story_name'] = story.story_name
+    print(story.to_dict())
     return create_response(data = {'story': story.to_dict()}, message = 'Story updated')
 
 @app.route(STORIES_ID_URL, methods = ['DELETE'])
@@ -54,9 +59,5 @@ def delete_stories(story_id):
     to_delete = Story.query.get(story_id)
     db.session.delete(to_delete)
     StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
-    # Tried a different way to delete story pois but not working atm
-    # to_delete = StoryPOI.query.filter(story_id == story_id).fetch()
-    # for s in to_delete:
-    #     db.session.delete(s)
     db.session.commit()
     return create_response(message = 'Story deleted')
