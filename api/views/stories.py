@@ -28,8 +28,8 @@ def post_stories():
     db.session.flush()
 
     if 'poi_ids' in data:
-    	new_story_pois = [row_constructor(StoryPOI, story_id=new_story.id, poi_id=poi_id) for poi_id in data['poi_ids']]
-    	db.session.add_all(new_story_pois)
+        new_story_pois = [row_constructor(StoryPOI, story_id=new_story.id, poi_id=poi_id) for poi_id in data['poi_ids']]
+        db.session.add_all(new_story_pois)
     db.session.commit()
     story_dict = new_story.to_dict()
     story_dict['id'] = new_story.id
@@ -40,17 +40,17 @@ def put_stories(story_id):
     data = request.get_json()
     story = Story.query.get(story_id)
     if 'story_name' in data:
-    	story.story_name = data['story_name']
+        story.story_name = data['story_name']
     if 'poi_ids' in data:
-    	if(len(data['poi_ids']) > 0):
-    		for i in new_poi_ids:
-    			new_story_pois = [row_constructor(StoryPOI, story_id = story_id, poi_id = poi_id) for poi_id in data['poi_ids']]
-    			db.session.add_all(new_story_pois)
-   		else:
-   			StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
+        if(len(data['poi_ids']) > 0):
+            for i in new_poi_ids:
+                new_story_pois = [row_constructor(StoryPOI, story_id = story_id, poi_id = poi_id) for poi_id in data['poi_ids']]
+                db.session.add_all(new_story_pois)
+        else:
+            StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
     db.session.commit()
     return create_response(data = {'story': story.to_dict()}, message = 'Story updated')
-
+    
 
 @app.route(STORIES_ID_URL, methods = ['DELETE'])
 def delete_stories(story_id):
