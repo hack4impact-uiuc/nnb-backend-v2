@@ -24,3 +24,6 @@ app.register_blueprint(pois.mod)
 
 from api.views import stories
 app.register_blueprint(stories.mod)
+
+from api.views import maps
+app.register_blueprint(maps.mod)
