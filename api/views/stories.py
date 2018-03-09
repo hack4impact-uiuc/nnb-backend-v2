@@ -15,11 +15,10 @@ def get_stories():
         stories = StoryPOI.query.filter(StoryPOI.poi_id == data['poi_id'])
         if stories.count() == 0:
             return create_response(status=404, message='No stories found for specified POI')
-        else:
-            return create_response({'stories': [s.to_dict() for s in stories]})
-    else:
-        stories = Story.query.all()
         return create_response({'stories': [s.to_dict() for s in stories]})
+
+    stories = Story.query.all()
+    return create_response({'stories': [s.to_dict() for s in stories]})
 
 @app.route(STORIES_URL, methods=['POST'])
 def post_stories():
@@ -36,7 +35,7 @@ def post_stories():
         db.session.add_all(new_story_pois)
     db.session.commit()
     story = Story.query.get(new_story.id)
-    return create_response(data = {'story': story.to_dict()}, message = 'Story created')
+    return create_response(data={'story': story.to_dict()}, message='Story created')
 
 @app.route(STORIES_ID_URL, methods=['PUT'])
 def put_stories(story_id):
@@ -47,18 +46,17 @@ def put_stories(story_id):
     if 'poi_ids' in data:
         StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
         if(len(data['poi_ids']) > 0):
-            new_story_pois = [row_constructor(StoryPOI, story_id = story_id, poi_id = poi_id) for poi_id in data['poi_ids']]
+            new_story_pois = [row_constructor(StoryPOI, story_id=story_id, poi_id=poi_id) for poi_id in data['poi_ids']]
             db.session.add_all(new_story_pois)
             db.session.commit()
     story = Story.query.get(story_id)
-    return create_response(data = {'story': story.to_dict()}, message = 'Story updated')
+    return create_response(data={'story': story.to_dict()}, message='Story updated')
 
-@app.route(STORIES_ID_URL, methods = ['DELETE'])
+@app.route(STORIES_ID_URL, methods=['DELETE'])
 def delete_stories(story_id):
     to_delete = Story.query.get(story_id)
     if to_delete.count() == 0:
         return create_response(status=404, message='Provided story_id does not exist')
     db.session.delete(to_delete)
-    StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
     db.session.commit()
-    return create_response(message = 'Story deleted')
+    return create_response(message='Story deleted')
