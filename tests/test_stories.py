@@ -65,8 +65,8 @@ story_with_pois = {
 }
 
 
-os.environ['STORY_ID_1'] = '1' #initialize POI_ID as environment variable
-os.environ['STORY_ID_2'] = '2'
+os.environ['STORY_ID_1'] = '1' # this one doesn't have pois
+os.environ['STORY_ID_2'] = '2' # this one has the pois
 os.environ['POI_ID_1'] = '1'
 os.environ['POI_ID_2'] = '2'
 
@@ -93,3 +93,22 @@ class POITests(unittest.TestCase):
         self.assertEqual(response['code'], 201)
         self.assertEqual(response['result']['story']['story_name'], story_with_pois['story_name'])
         os.environ['STORY_ID_2'] = str(response['result']['story']['_id'])
+
+    def test3_get_stories(self):
+        story_id_1 = int(os.environ.get('STORY_ID_1'))
+        story_id_2 = int(os.environ.get('STORY_ID_2'))
+        poi_id_1 = int(os.environ.get('POI_ID_1'))
+        # GET with no parameters
+        r = requests.get('http://127.0.0.1:5000/stories')
+        response = r.json()
+        self.assertEqual(response['code'], 200)
+        story = next((s for s in response['result']['stories'] if s['_id'] == story_id_1), None)
+        self.assertEqual(story['story_name'], story_empty['story_name'])
+        story = next((s for s in response['result']['stories'] if s['_id'] == story_id_2), None)
+        self.assertEqual(story['story_name'], story_with_pois['story_name'])
+        # GET with poi_id parameter
+        r = requests.get('http://127.0.0.1:5000/stories?poi_id={}'.format(poi_id_1))
+        response = r.json()
+        self.assertEqual(response['code'], 200)
+        story = next((s for s in response['result']['stories'] if s['_id'] == story_id_2), None)
+        self.assertEqual(story['story_name'], story_with_pois['story_name'])
