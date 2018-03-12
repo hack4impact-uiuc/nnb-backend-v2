@@ -12,8 +12,8 @@ STORIES_ID_URL = "/stories/<int:story_id>"
 def get_stories():
     data = request.args
     stories = []
-    if 'POI' in data:
-        storyPOIs = StoryPOI.query.filter(StoryPOI.poi_id == data['POI'])
+    if 'poi_id' in data:
+        storyPOIs = StoryPOI.query.filter(StoryPOI.poi_id == data['poi_id'])
         if storyPOIs.count() == 0:
             return create_response(status=404, message='No stories found for specified POI')
         for sp in storyPOIs:
