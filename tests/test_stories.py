@@ -9,9 +9,8 @@ from flask import jsonify
 import json
 
 poi1 = {
-    '_id' = 1
     'name': 'Himalayan Chimney',
-    'date': 'Date(2018, 2, 27)',
+    'date': '2018-02-02',
     'description': 'Yum',
     'map_year': 2018,
     'x_coord': 12,
@@ -19,9 +18,8 @@ poi1 = {
 }
 
 poi2 = {
-    '_id' = 2
     'name': 'Mount Everest',
-    'date': 'Date(2018, 5, 15)',
+    'date': '2018-05-15',
     'description': 'Snow',
     'map_year': 2018,
     'x_coord': 15,
@@ -29,7 +27,6 @@ poi2 = {
 }
 
 poi3 = {
-    '_id' = 3
     'name': 'Tampa Bay',
     'date': 'Date(2018, 8, 3)',
     'description': 'Hot',
@@ -56,10 +53,43 @@ stories = [
       'story_name': 'Time for Hack4Impact',
     }
 ]
-            
-          
-    story = {
-    '_id': 25
+
+
+story_empty = {
     'story_name' : 'Jeffy Discovers the Dark side of the Moon'
 }
 
+story_with_pois = {
+    'story_name' : 'Angad Goes to Wisconsin',
+    'poi_ids' : []
+}
+
+
+os.environ['STORY_ID_1'] = '1' #initialize POI_ID as environment variable
+os.environ['STORY_ID_2'] = '2'
+os.environ['POI_ID_1'] = '1'
+os.environ['POI_ID_2'] = '2'
+
+class POITests(unittest.TestCase):
+
+    def test1_post_story(self):
+        r = requests.post('http://127.0.0.1:5000/stories', json=story_empty)
+        response = r.json()
+        self.assertEqual(response['code'], 201)
+        self.assertEqual(response['result']['story']['story_name'], story_empty['story_name'])
+        os.environ['STORY_ID_1'] = str(response['result']['story']['_id'])
+
+    def test2_post_story_with_pois(self):
+        r = requests.post('http://127.0.0.1:5000/pois', json=poi1)
+        response = r.json()
+        story_with_pois['poi_ids'].append(response['result']['poi']['_id'])
+        os.environ['POI_ID_1'] = str(response['result']['poi']['_id'])
+        r = requests.post('http://127.0.0.1:5000/pois', json=poi2)
+        response = r.json()
+        story_with_pois['poi_ids'].append(response['result']['poi']['_id'])
+        os.environ['POI_ID_2'] = str(response['result']['poi']['_id'])
+        r = requests.post('http://127.0.0.1:5000/stories', json=story_with_pois)
+        response = r.json()
+        self.assertEqual(response['code'], 201)
+        self.assertEqual(response['result']['story']['story_name'], story_with_pois['story_name'])
+        os.environ['STORY_ID_2'] = str(response['result']['story']['_id'])
