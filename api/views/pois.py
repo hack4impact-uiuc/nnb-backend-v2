@@ -67,8 +67,8 @@ def create_poi():
     data['links'] = data['links'] if 'links' in data else []
     data['media'] = data['media'] if 'media' in data else []
     data['story_ids'] = data['story_ids'] if 'story_ids' in data else []
-    data['date'] = parse(data['date']) if 'date' in data else date(data['map_year'], 1, 1)
     # Assumes that data['date'] is a parsable string containing a date if it exists
+    data['date'] = parse(data['date']) if 'date' in data else date(data['map_year'], 1, 1)
     for link in data['links']:
         if 'link_url' not in link:
             return create_response(
