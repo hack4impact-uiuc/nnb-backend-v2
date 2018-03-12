@@ -98,17 +98,6 @@ poi_edit1_bad = {
     'story_ids': []
 }
 
-poi_edit2_bad = {
-    'name': '',
-    'date': '01-01-00',
-    'description': '',
-    'links': [],
-    'media': [],
-    'story_ids': []
-}
-
-#Move to separate file
-
 map_year = 2018
 story_id = 2
 
@@ -252,25 +241,16 @@ class POITests(unittest.TestCase):
     # #Tests that should fail or break
     # #Tests that should fail or break
     #
+
     def test2_1_bad(self):
         r = requests.post('http://127.0.0.1:5000/pois', json= poi_edit1_bad)
         response = r.json()
         self.assertEqual(response['code'], 422)
 
     def test2_2_bad(self, poi_id=0):
-        # if poi_id == 0:
-        #     poi_id = int(os.environ.get('POI_ID'))
         r = requests.get('http://127.0.0.1:5000/pois/{}'.format(poi_id_bad))
         response = r.json()
         self.assertEqual(response['code'], 404)
-        # self.assertEqual(response['result']['poi']['_id'], poi_id_bad)
-        # query_response = POI.query.get(poi_id_bad)
-        # self.assertEqual(response['result']['poi']['name'], query_response.name)
-        # # self.assertEqual(response['result']['poi']['date'], query_response.date)
-        # self.assertEqual(response['result']['poi']['description'], query_response.description)
-        # self.assertEqual(response['result']['poi']['map_year'], query_response.map_year)
-        # self.assertEqual(response['result']['poi']['x_coord'], query_response.x_coord)
-        # self.assertEqual(response['result']['poi']['y_coord'], query_response.y_coord)
 
     def test2_3_bad(self):
         r1 = requests.get('http://127.0.0.1:5000/pois?map_year={}'.format(map_year_bad))
@@ -279,44 +259,20 @@ class POITests(unittest.TestCase):
         response2 = r2.json()
         #map_year_bad
         self.assertEqual(response1['code'], 404)
-        # for i in response1['result']['pois']:
-        #     self.test2_get_poi_by_id(poi_id = i['_id']) #GONNA HAVE AN ISSUE HERE
-        #     self.assertEqual(i['map_year'], map_year_bad)
-        # story_id_bad
         self.assertEqual(response2['code'], 404)
-        # for i in response2['result']['pois']:
-        #     stories_by_poi_id = StoryPOI.query.filter(StoryPOI.poi_id == i['_id'])
-        #     story_ids1 = [j.to_dict()['story_id'] for j in stories_by_poi_id]
-        #     story_ids2 = [k['_id'] for k in i['stories']]
-        #     self.assertEqual(sorted(story_ids1), sorted(story_ids2))
-
-    def test2_4_ok(self):
-        #This is ok because an empty input should still be valid.
-        poi_id = int(os.environ.get('POI_ID'))
-        r = requests.put('http://127.0.0.1:5000/pois/{}'.format(poi_id), json=poi_edit2_bad)
-        response = r.json()
-        self.assertEqual(response['code'], 200)
 
     def test2_5_bad(self):
         # poi_id = int(os.environ.get('POI_ID'))
         r = requests.delete('http://127.0.0.1:5000/pois/{}'.format(poi_id_bad))
         response = r.json()
         self.assertEqual(response['code'], 404)
-        # POI_query = POI.query.get(poi_id_bad)
-        # Media_query = Media.query.filter(Media.poi_id == poi_id_bad)
-        # Link_query = Link.query.filter(Link.poi_id == poi_id_bad)
-        # StoryPOI_query = StoryPOI.query.filter(StoryPOI.poi_id == poi_id_bad)
-        # self.assertEqual(POI_query, None)
-        # self.assertEqual(Media_query.count(), 0)
-        # self.assertEqual(Link_query.count(), 0)
-        # self.assertEqual(StoryPOI_query.count(), 0)
 
     def test3_1_None(self):
         r = requests.post('http://127.0.0.1:5000/pois', json= None)
         response = r.json()
         self.assertEqual(response['code'], 404)
 
-    def test4_4_None(self):
+    def test3_4_None(self):
         poi_id = int(os.environ.get('POI_ID'))
         r = requests.put('http://127.0.0.1:5000/pois/{}'.format(poi_id), json= None)
         response = r.json()
