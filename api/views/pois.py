@@ -58,17 +58,17 @@ def get_poi_by_id(poi_id):
 def create_poi():
     data = request.get_json()
 
-    data['links'] = data['links'] if 'links' in data else []
-    data['media'] = data['media'] if 'media' in data else []
-    data['story_ids'] = data['story_ids'] if 'story_ids' in data else []
-    data['date'] = parse(data['date']) if 'date' in data else date(data['map_year'], 1, 1)
-
     # Check that all required parameters exist
     if not all(i in data for i in ('name', 'description', 'map_year', 'x_coord', 'y_coord')):
         return create_response(
             status=422,
             message='POI not created; missing required input parameter(s)'
         )
+    data['links'] = data['links'] if 'links' in data else []
+    data['media'] = data['media'] if 'media' in data else []
+    data['story_ids'] = data['story_ids'] if 'story_ids' in data else []
+    # Assumes that data['date'] is a parsable string containing a date if it exists
+    data['date'] = parse(data['date']) if 'date' in data else date(data['map_year'], 1, 1)
     for link in data['links']:
         if 'link_url' not in link:
             return create_response(
@@ -146,7 +146,7 @@ def update_poi(poi_id):
 
     edited_poi = POI.query.get(poi_id)
     response_data = {'poi': poi_links_media_stories(edited_poi.to_dict())}
-    return create_response(response_data, 201, 'POI edited')
+    return create_response(response_data, 200, 'POI edited')
 
 @app.route(POIS_ID_URL, methods=['DELETE'])
 def delete_poi(poi_id):
