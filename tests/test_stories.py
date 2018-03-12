@@ -98,6 +98,7 @@ class POITests(unittest.TestCase):
         story_id_1 = int(os.environ.get('STORY_ID_1'))
         story_id_2 = int(os.environ.get('STORY_ID_2'))
         poi_id_1 = int(os.environ.get('POI_ID_1'))
+        poi_id_2 = int(os.environ.get('POI_ID_2'))
         # GET with no parameters
         r = requests.get('http://127.0.0.1:5000/stories')
         response = r.json()
@@ -108,6 +109,11 @@ class POITests(unittest.TestCase):
         self.assertEqual(story['story_name'], story_with_pois['story_name'])
         # GET with poi_id parameter
         r = requests.get('http://127.0.0.1:5000/stories?poi_id={}'.format(poi_id_1))
+        response = r.json()
+        self.assertEqual(response['code'], 200)
+        story = next((s for s in response['result']['stories'] if s['_id'] == story_id_2), None)
+        self.assertEqual(story['story_name'], story_with_pois['story_name'])
+        r = requests.get('http://127.0.0.1:5000/stories?poi_id={}'.format(poi_id_2))
         response = r.json()
         self.assertEqual(response['code'], 200)
         story = next((s for s in response['result']['stories'] if s['_id'] == story_id_2), None)
