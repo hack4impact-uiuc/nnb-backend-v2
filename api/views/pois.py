@@ -59,35 +59,37 @@ def create_poi():
     data = request.get_json()
 
     # Check that all required parameters exist
-    if not all(i in data for i in ('name', 'description', 'map_year', 'x_coord', 'y_coord')):
+    required_fields = ['name', 'description', 'map_year', 'x_coord', 'y_coord']
+    missing_fields = [field for field in required_fields if data.get(field) is None]
+    if len(missing_fields):
         return create_response(
             status=422,
-            message='POI not created; missing required input parameter(s)'
+            message='POI not created; missing {}'.format(', '.join(missing_fields))
         )
-    data['links'] = data['links'] if 'links' in data else []
-    data['media'] = data['media'] if 'media' in data else []
-    data['story_ids'] = data['story_ids'] if 'story_ids' in data else []
+    content_fields = ['links', 'media', 'story_ids']
+    missing_content = [field for field in content_fields if type(data.get(field)) is not list]
+    for field in missing_content:
+        data[field] = []
     # Assumes that data['date'] is a parsable string containing a date if it exists
-    data['date'] = parse(data['date']) if 'date' in data else date(data['map_year'], 1, 1)
-    for link in data['links']:
-        if 'link_url' not in link:
-            return create_response(
+    data['date'] = parse(data['date']) if type(data.get('date')) is str else date(data['map_year'], 1, 1)
+    link_urls = [link.get('link_url') for link in data['links']]
+    media_urls = [media.get('content_url') for media in data['media']]
+    missing_stories = [story_id for story_id in data['story_ids'] if Story.query.get(story_id) is None]
+    if None in link_urls:
+        return create_response(
                 status=422,
                 message='POI not created; missing link URL'
-            )
-    for media in data['media']:
-        if 'content_url' not in media:
-            return create_response(
+        )
+    if None in media_urls:
+        return create_response(
                 status=422,
                 message='POI not created; missing media URL'
-            )
-
-    for story_id in data['story_ids']:
-        if Story.query.get(story_id) is None:
-            return create_response(
+        )
+    if len(missing_stories):
+        return create_response(
                 status=422,
-                message='POI not created; story_id {} does not exist'.format(story_id)
-            )
+                message='POI not created; missing story_id {}'.format(', '.join(missing_stories))
+        )
 
     poi_add = row_constructor(POI, data)
     db.session.add(poi_add)
@@ -113,35 +115,36 @@ def update_poi(poi_id):
     data = request.get_json()
 
     # Edit poi columns
-    if 'name' in data:
-        poi.name = data['name']
-    if 'date' in data:
-        poi.date = parse(data['date'])
-    if 'description' in data:
-        poi.description = data['description']
+    poi_columns = ['name', 'date', 'description']
+    edit_poi_columns = [col for col in poi_columns if data.get(col) is not None]
+    for col in edit_poi_columns:
+        setattr(poi, col, data[col])
     
     # Replace all links, media, and story_id if they were given
-    if 'links' in data:
+    if data.get('links') is not None:
         for link in Link.query.filter(Link.poi_id == poi_id):
             db.session.delete(link)
         link_add = [row_constructor(Link, i, poi_id=poi_id) for i in data['links']]
-        db.session.add_all(link_add)
-    if 'media' in data:
+        if len(link_add):
+            db.session.add_all(link_add)
+    if data.get('media') is not None:
         for media in Media.query.filter(Media.poi_id == poi_id):
             db.session.delete(media)
         media_add = [row_constructor(Media, i, poi_id=poi_id) for i in data['media']]
-        db.session.add_all(media_add)
-    if 'story_ids' in data:
-        for story_id in data['story_ids']:
-            if Story.query.get(story_id) is None:
-                return create_response(
-                    status=422,
-                    message='POI not created; story_id {} does not exist'.format(i)
-                )
-        for story_id in StoryPOI.query.filter(StoryPOI.poi_id == poi_id):
-            db.session.delete(story_id)
+        if len(media_add):
+            db.session.add_all(media_add)
+    if data.get('story_ids') is not None:
+        missing_stories = [story_id for story_id in data['story_ids'] if Story.query.get(story_id) is None]
+        if len(missing_stories):
+            return create_response(
+                status=422,
+                message='POI not created; missing story_id {}'.format(', '.join(missing_stories))
+            )
+        for story_poi_link in StoryPOI.query.filter(StoryPOI.poi_id == poi_id):
+            db.session.delete(story_poi_link)
         story_add = [row_constructor(StoryPOI, story_id=i, poi_id=poi_id) for i in data['story_ids']]
-        db.session.add_all(story_add)
+        if len(story_add):
+            db.session.add_all(story_add)
     db.session.commit()
 
     edited_poi = POI.query.get(poi_id)
