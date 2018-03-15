@@ -44,6 +44,7 @@ def put_stories(story_id):
     story = Story.query.get(story_id)
     if 'story_name' in data:
         story.story_name = data['story_name']
+        db.session.commit()
     if 'poi_ids' in data:
         StoryPOI.query.filter(StoryPOI.story_id == story_id).delete()
         if(len(data['poi_ids']) > 0):
