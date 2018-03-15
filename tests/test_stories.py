@@ -35,26 +35,6 @@ poi3 = {
     'y_coord': 82
 }
 
-stories = [
-    {
-      '_id': 21,
-      'story_name': 'Angad Goes to Wisconsin',
-    },
-    {
-      '_id': 22,
-      'story_name': 'Amanda Takes her Medicine',
-    },
-    {
-      '_id': 23,
-      'story_name': 'Jeffy Goes to Fashion Show',
-    },
-    {
-      '_id': 24,
-      'story_name': 'Time for Hack4Impact',
-    }
-]
-
-
 story_with_no_pois = {
     'story_name' : 'Jeffy Discovers the Dark side of the Moon'
 }
