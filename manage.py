@@ -62,7 +62,6 @@ def backup_db():
     for table_data in db.metadata.tables.items():
         table_names.append(table_data[0])
         
-
     #Query all tables and write to csv
     for table_name in table_names:
         query_string = 'SELECT * FROM {};'.format(table_name)
