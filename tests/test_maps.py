@@ -9,7 +9,7 @@ import requests
 from flask import jsonify
 import json
 
-# json objects to be tested 
+# json objects to be tested
 map_add_json_1 = {
     "map_year" : 1669,
     "image_url": 'http://www.arizona-leisure.com/gfx/maps/valley-sun-map-760.gif'
@@ -53,7 +53,7 @@ poi_add_json_2 = {
     "name" : "The Great Herbal Fire",
     "date" : "4/20",
     "description" : "An uplifting experience for many people",
-    "map_year" : 1669,
+    "map_year" : 3000,
     "x_coord" : "7",
     "y_coord" : "5",
     'links': [],
@@ -65,7 +65,7 @@ poi_add_json_3 = {
     "name" : "Nithin Becomes a Man",
     "date" : "2/4",
     "description" : "Nothing really",
-    "map_year" : 1670,
+    "map_year" : 3000,
     "x_coord" : "8",
     "y_coord" : "9",
     'links': [],
@@ -73,47 +73,53 @@ poi_add_json_3 = {
     'story_ids': []
 }
 
+def find_map_occurence(map_obj):
+    data = requests.get('http://127.0.0.1:5000/maps')
+    map_year = map_obj['map_year']
+    map_year_list = list(filter(lambda x: x['map_year'], data.json()['result']['maps']))
+    while map_year in map_year_list:
+        map_year = random.randInt(1800,2018)
+    map_obj['map_year'] = map_year
+
+# def find_non_existent_id():
+#     _id = 13
 
 
-def clear_database():
-    Map.query.delete()
-    db.session.commit()
 
 class MapTests(unittest.TestCase):
  # this is a comprensive test suite for testing the map end points
 
     def test_map_post_get(self):
-        clear_database()
         # testing 1 post and 1 get
-        response = requests.post('http://127.0.0.1:5000/maps', json= map_add_json_1)
-        data = requests.get('http://127.0.0.1:5000/maps')
+        find_map_occurence(map_add_json_1)
+        post_data = requests.post('http://127.0.0.1:5000/maps', json= map_add_json_1)
+        get_data = requests.get('http://127.0.0.1:5000/maps')
 
-        response_data = data.json()['result']['maps']
-        self.assertEqual(response.json()['code'], 201)
-        self.assertEqual(data.json()['code'], 200)
-        self.assertEqual(response_data[0]['map_year'], 1669)
-        self.assertEqual(response_data[0]['image_url'], 'http://www.arizona-leisure.com/gfx/maps/valley-sun-map-760.gif')
-        # testing an additional post and see if all maps in db are retrieved
-        response = requests.post('http://127.0.0.1:5000/maps', json = map_add_json_2)
-        data = requests.get('http://127.0.0.1:5000/maps')
+        post_data_body = post_data.json()['result']['map']
+        get_data_body = get_data.json()['result']['maps']
+        self.assertEqual(post_data.json()['code'], 201)
+        self.assertEqual(get_data.json()['code'], 200)
 
-        response_data = data.json()['result']['maps']
-        self.assertEqual(response.json()['code'], 201)
-        self.assertEqual(data.json()['code'], 200)
-        self.assertEqual(response_data[1]['map_year'], 1670)
-        self.assertEqual(response_data[1]['image_url'], 'http://www.fultonranchtownecenter.com/Post/sections/11/Images/FR_MasterPlan.jpg')
-        # testing one last map
-        response = requests.post('http://127.0.0.1:5000/maps', json = map_add_json_3)
-        data = requests.get('http://127.0.0.1:5000/maps')
+        map_id_list = [x['_id'] for x in get_data_body]
+        map_posted = post_data_body['_id'] in map_id_list
+        self.assertEqual(True, map_posted)
 
+        # is there a way to shorten this ?
 
-        response_data = data.json()['result']['maps']
-        self.assertEqual(response.json()['code'], 201)
-        self.assertEqual(data.json()['code'], 200)
-        self.assertEqual(len(response_data),3)
-        self.assertEqual(response_data[2]['map_year'], 3000)
-        self.assertEqual(response_data[2]['image_url'], "https://pcavote.files.wordpress.com/2015/12/jonas-brothers-reunion.jpg")
+        map_in_list = None
+        for map_obj in get_data_body:
+            if map_obj['_id'] == post_data_body['_id']:
+                map_in_list = map_obj
+                break
+
+        self.assertEqual(post_data_body['map_year'], map_in_list['map_year'])
+        self.assertEqual(post_data_body['image_url'], map_in_list['image_url'])
+
+    def test_map_post_get_delete_bad(self):
         # test that the proper status_code is returned given bad requests
+        before_get = requests.get('http://127.0.0.1:5000/maps')
+        before_size = len(before_get.json()['result']['maps'])
+
         response = requests.post('http://127.0.0.1:5000/maps', json= map_add_json_bad_1)
         self.assertEqual(response.json()['code'], 400)
 
@@ -123,45 +129,42 @@ class MapTests(unittest.TestCase):
         response = requests.post('http://127.0.0.1:5000/maps', json= map_add_json_bad_3)
         self.assertEqual(response.json()['code'], 400)
 
-        response = requests.delete('http://127.0.0.1:5000/maps/4')
-        self.assertEqual(response.json()['code'], 404)
+        id = 1
+        while id in list(filter(lambda x: x['_id'], before_get.json()['result']['maps'])):
+            id+=1
+        response = requests.delete('http://127.0.0.1:5000/maps/{}'.format(id))
+        self.assertEqual(response.json()['status'], 404)
 
-        data = requests.get('http://127.0.0.1:5000/maps')
-        response_data_before = data.json()['result']['maps']
-        self.assertEqual(len(response_data),3)
+        after_get = requests.get('http://127.0.0.1:5000/maps')
+        after_size = len(after_get.json()['result']['maps'])
+        self.assertEqual(before_size,after_size)
+
         # This test suite is under the assumption that the post_poi/get_poi
         # is fully functional.
+
+    def test_map_delete(self):
+
+        # tests the delete functionality and checks that the pois are deleted as
+        # well
+        find_map_occurence(map_add_json_3)
+        poi_add_json_1['map_year'] = map_add_json_3['map_year']
+        poi_add_json_2['map_year'] = map_add_json_3['map_year']
+        poi_add_json_3['map_year'] = map_add_json_3['map_year']
+
         requests.post('http://127.0.0.1:5000/pois', json = poi_add_json_1)
         requests.post('http://127.0.0.1:5000/pois', json = poi_add_json_2)
         requests.post('http://127.0.0.1:5000/pois', json = poi_add_json_3)
-        # tests the delete functionality and checks that the pois are deleted as
-        # well
-        response = requests.delete('http://127.0.0.1:5000/maps/{}'.format(response_data_before[0]['_id']))
-        self.assertEqual(response.json()['code'], 200)
+
+        post_data = requests.post('http://127.0.0.1:5000/maps', json= map_add_json_3)
+        post_data_body = post_data.json()['result']['map']
+        id = post_data_body['_id']
+        response = requests.delete('http://127.0.0.1:5000/maps/{}'.format(id))
+        self.assertEqual(response.json()['status'], 200)
+
         data = requests.get('http://127.0.0.1:5000/maps')
         response_data = data.json()['result']['maps']
-        self.assertEqual(len(response_data),2)
+        map_deleted = id not in list(filter(lambda x: x['_id'], get_data_body))
+        self.assertEqual(True,map_deleted)
 
-        map_year = response_data_before[0]['map_year']
-        pois_response = requests.get('http://127.0.0.1:5000/pois?map_year={}'.format(map_year))
-        self.assertEqual(pois_response.json()['code'], 404)
-
-        response = requests.delete('http://127.0.0.1:5000/maps/{}'.format(response_data[0]['_id']))
-        self.assertEqual(response.json()['code'], 200)
-        data = requests.get('http://127.0.0.1:5000/maps')
-        response_data = data.json()['result']['maps']
-        self.assertEqual(len(response_data),1)
-
-        map_year = response_data_before[0]['map_year']
-        pois_response = requests.get('http://127.0.0.1:5000/pois?map_year={}'.format(map_year))
-        self.assertEqual(pois_response.json()['code'], 404)
-
-        response = requests.delete('http://127.0.0.1:5000/maps/{}'.format(response_data[0]['_id']))
-        self.assertEqual(response.json()['code'], 200)
-        data = requests.get('http://127.0.0.1:5000/maps')
-        response_data = data.json()['result']['maps']
-        self.assertEqual(len(response_data),0)
-
-        map_year = response_data_before[0]['map_year']
-        pois_response = requests.get('http://127.0.0.1:5000/pois?map_year={}'.format(map_year))
+        pois_response = requests.get('http://127.0.0.1:5000/pois?map_year={}'.format(post_data_body['map_year']))
         self.assertEqual(pois_response.json()['code'], 404)
