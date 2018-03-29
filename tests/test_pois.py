@@ -189,14 +189,3 @@ class POITests(unittest.TestCase):
         r = requests.delete('http://127.0.0.1:5000/pois/{}'.format(poi_id_invalid))
         response = r.json()
         self.assertEqual(response['code'], 404)
-
-    def test3_1_None(self):
-        r = requests.post('http://127.0.0.1:5000/pois', json= None)
-        response = r.json()
-        self.assertEqual(response['code'], 404)
-
-    def test3_2_None(self):
-        poi_id = int(os.environ.get('POI_ID'))
-        r = requests.put('http://127.0.0.1:5000/pois/{}'.format(poi_id), json= None)
-        response = r.json()
-        self.assertEqual(response['code'], 404)
