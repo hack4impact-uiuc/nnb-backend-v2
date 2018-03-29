@@ -9,7 +9,7 @@ from flask import jsonify
 import json
 from datetime import date
 
-# Complete pois (all required and optional attributes)
+# Complete POI (all required and optional attributes)
 poi_create_complete = {
     'name': 'Morrow Plots',
     'date': '2018-03-05',
@@ -51,11 +51,34 @@ poi_update_complete = {
     'story_ids': [1, 2]
 }
 
+# Invalid POI (missing required POIs)
 poi_create_invalid = {
     'date': '01-01-00',
     'links': [],
     'media': [],
     'story_ids': []
+}
+
+# Invalid POI (keys correspond to None values)
+poi_create_invalid_none = {
+    'name': None,
+    'date': None,
+    'description': None,
+    'map_year': None,
+    'x_coord': None,
+    'y_coord': None,
+    'links': None,
+    'media': None,
+    'story_ids': None
+}
+
+poi_update_invalid_none = {
+    'name': None,
+    'date': None,
+    'description': None,
+    'links': None,
+    'media': None,
+    'story_ids': None
 }
 
 map_year_invalid = 0
@@ -165,12 +188,12 @@ class POITests(unittest.TestCase):
         response2 = r2.json()
         self.assertEqual(response2['code'], 404)
 
-    def test2_1_invalid(self):
+    def test2_1_invalid_create(self):
         r = requests.post('http://127.0.0.1:5000/pois', json=poi_create_invalid)
         response = r.json()
         self.assertEqual(response['code'], 422)
 
-    def test2_2_invalid(self, poi_id=0):
+    def test2_2_invalid_get_poi_by_id(self, poi_id=0):
         r = requests.get('http://127.0.0.1:5000/pois/{}'.format(poi_id_invalid))
         response = r.json()
         self.assertEqual(response['code'], 404)
@@ -185,7 +208,18 @@ class POITests(unittest.TestCase):
         response = r.json()
         self.assertEqual(response['code'], 404)
 
-    def test2_5_invalid(self):
+    def test2_5_invalid_delete(self):
         r = requests.delete('http://127.0.0.1:5000/pois/{}'.format(poi_id_invalid))
+        response = r.json()
+        self.assertEqual(response['code'], 404)
+
+    def test3_1_invalid_create_none(self):
+        r = requests.post('http://127.0.0.1:5000/pois', json=poi_create_invalid_none)
+        response = r.json()
+        self.assertEqual(response['code'], 422)
+
+    def test3_2_invalid_update_none(self):
+        poi_id = int(os.environ.get('POI_ID'))
+        r = requests.put('http://127.0.0.1:5000/pois/{}'.format(poi_id), json=poi_update_invalid_none)
         response = r.json()
         self.assertEqual(response['code'], 404)
