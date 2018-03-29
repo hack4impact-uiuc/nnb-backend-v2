@@ -51,6 +51,16 @@ poi_update_complete = {
     'story_ids': [1, 2]
 }
 
+# Valid Update. POI keys correspond to None values, but still valid because updates nothing
+poi_update_none = {
+    'name': None,
+    'date': None,
+    'description': None,
+    'links': None,
+    'media': None,
+    'story_ids': None
+}
+
 # Invalid POI (missing required POIs)
 poi_create_invalid = {
     'date': '01-01-00',
@@ -67,15 +77,6 @@ poi_create_invalid_none = {
     'map_year': None,
     'x_coord': None,
     'y_coord': None,
-    'links': None,
-    'media': None,
-    'story_ids': None
-}
-
-poi_update_invalid_none = {
-    'name': None,
-    'date': None,
-    'description': None,
     'links': None,
     'media': None,
     'story_ids': None
@@ -178,7 +179,14 @@ class POITests(unittest.TestCase):
         response_story_ids = [i['_id'] for i in response['result']['poi']['stories']]
         self.assertEqual(sorted(response_story_ids), sorted(poi_update_complete['story_ids']))
 
-    def test1_6_delete_poi(self):
+    def test1_6_update_none(self):
+        poi_id = int(os.environ.get('POI_ID'))
+        r = requests.put('http://127.0.0.1:5000/pois/{}'.format(poi_id), json=poi_update_none)
+        response = r.json()
+        # Successfully updates nothing
+        self.assertEqual(response['code'], 200)
+
+    def test1_7_delete_poi(self):
         poi_id = int(os.environ.get('POI_ID'))
         r = requests.delete('http://127.0.0.1:5000/pois/{}'.format(poi_id))
         response = r.json()
@@ -217,9 +225,3 @@ class POITests(unittest.TestCase):
         r = requests.post('http://127.0.0.1:5000/pois', json=poi_create_invalid_none)
         response = r.json()
         self.assertEqual(response['code'], 422)
-
-    def test3_2_invalid_update_none(self):
-        poi_id = int(os.environ.get('POI_ID'))
-        r = requests.put('http://127.0.0.1:5000/pois/{}'.format(poi_id), json=poi_update_invalid_none)
-        response = r.json()
-        self.assertEqual(response['code'], 404)
