@@ -70,46 +70,46 @@ class POITests(unittest.TestCase):
         r = requests.post('http://127.0.0.1:5000/pois', json=poi_create_complete)
         response = r.json()
         self.assertEqual(response['code'], 201)
-        self.assertEqual(response['result']['poi']['name'], poi_create_complete['name'])
-        # Date in response is a date object, while date in json is just a string
-        # self.assertEqual(response['result']['poi']['date'], poi_create_complete['date'])
-        self.assertEqual(response['result']['poi']['description'], poi_create_complete['description'])
-        self.assertEqual(response['result']['poi']['map_year'], poi_create_complete['map_year'])
-        self.assertEqual(response['result']['poi']['x_coord'], poi_create_complete['x_coord'])
-        self.assertEqual(response['result']['poi']['y_coord'], poi_create_complete['y_coord'])
-        for i in range(len(response['result']['poi']['links'])):
-            self.assertEqual(response['result']['poi']['links'][i]['link_url'], poi_create_complete['links'][i]['link_url'])
-            self.assertEqual(response['result']['poi']['links'][i]['display_name'], poi_create_complete['links'][i]['display_name'])
-        for j in range(len(response['result']['poi']['media'])):
-            self.assertEqual(response['result']['poi']['media'][j]['content_url'], poi_create_complete['media'][j]['content_url'])
-            self.assertEqual(response['result']['poi']['media'][j]['caption'], poi_create_complete['media'][j]['caption'])
+        poi = response['result']['poi']
+        for key in poi_create_complete:
+            # Date in response is a date object, while date in json is just a string
+            # self.assertEqual(response['result']['poi']['date'], poi_create_complete['date'])
+            if key not in ['date', 'links', 'media', 'story_ids']:
+                self.assertEqual(poi[key], poi_create_complete[key])
+            elif key == 'links':
+                for j in range(len(poi_create_complete[key])):
+                    self.assertEqual(poi[key][j]['link_url'], poi_create_complete[key][j]['link_url'])
+                    self.assertEqual(poi[key][j]['display_name'], poi_create_complete[key][j]['display_name'])
+            elif key == 'media':
+                for j in range(len(poi_create_complete[key])):
+                    self.assertEqual(poi[key][j]['content_url'], poi_create_complete[key][j]['content_url'])
+                    self.assertEqual(poi[key][j]['caption'], poi_create_complete[key][j]['caption'])
         response_story_ids = [k['_id'] for k in response['result']['poi']['stories']]
         self.assertEqual(sorted(response_story_ids), sorted(poi_create_complete['story_ids']))
         os.environ['POI_ID'] = str(response['result']['poi']['_id'])
 
-    def test1_2_get_poi_by_id(self, poi_id=0):
-        if poi_id == 0:
-            poi_id = int(os.environ.get('POI_ID'))
+    def test1_2_get_poi_by_id(self):
+        poi_id = int(os.environ.get('POI_ID'))
         r = requests.get('http://127.0.0.1:5000/pois/{}'.format(poi_id))
         response = r.json()
         self.assertEqual(response['code'], 200)
-        self.assertEqual(response['result']['poi']['_id'], poi_id)
-        self.assertEqual(response['result']['poi']['name'], poi_create_complete['name'])
-        self.assertEqual(response['result']['poi']['description'], poi_create_complete['description'])
-        self.assertEqual(response['result']['poi']['map_year'], poi_create_complete['map_year'])
-        self.assertEqual(response['result']['poi']['x_coord'], poi_create_complete['x_coord'])
-        self.assertEqual(response['result']['poi']['y_coord'], poi_create_complete['y_coord'])
-        # Date in response is a date object, while date in json is just a string
-        # self.assertEqual(response['result']['poi']['date'], poi_create_complete['date'])
-        for i in range(len(response['result']['poi']['links'])):
-            self.assertEqual(response['result']['poi']['links'][i]['link_url'], poi_create_complete['links'][i]['link_url'])
-            self.assertEqual(response['result']['poi']['links'][i]['display_name'], poi_create_complete['links'][i]['display_name'])
-        for j in range(len(response['result']['poi']['media'])):
-            self.assertEqual(response['result']['poi']['media'][j]['content_url'], poi_create_complete['media'][j]['content_url'])
-            self.assertEqual(response['result']['poi']['media'][j]['caption'], poi_create_complete['media'][j]['caption'])
+        poi = response['result']['poi']
+        self.assertEqual(poi['_id'], poi_id)
+        for key in poi_create_complete:
+            # Date in response is a date object, while date in json is just a string
+            # self.assertEqual(response['result']['poi']['date'], poi_create_complete['date'])
+            if key not in ['date', 'links', 'media', 'story_ids']:
+                self.assertEqual(poi[key], poi_create_complete[key])
+            elif key == 'links':
+                for j in range(len(poi_create_complete[key])):
+                    self.assertEqual(poi[key][j]['link_url'], poi_create_complete[key][j]['link_url'])
+                    self.assertEqual(poi[key][j]['display_name'], poi_create_complete[key][j]['display_name'])
+            elif key == 'media':
+                for j in range(len(poi_create_complete[key])):
+                    self.assertEqual(poi[key][j]['content_url'], poi_create_complete[key][j]['content_url'])
+                    self.assertEqual(poi[key][j]['caption'], poi_create_complete[key][j]['caption'])
         response_story_ids = [k['_id'] for k in response['result']['poi']['stories']]
         self.assertEqual(sorted(response_story_ids), sorted(poi_create_complete['story_ids']))
-        # Future Testing needed for links, media, stories (would require several loops based on json response)
 
     def test1_3_get_pois_by_map_year(self):
         map_year = poi_create_complete['map_year']
@@ -138,16 +138,20 @@ class POITests(unittest.TestCase):
         r = requests.put('http://127.0.0.1:5000/pois/{}'.format(poi_id), json=poi_update_complete)
         response = r.json()
         self.assertEqual(response['code'], 200)
-        self.assertEqual(response['result']['poi']['name'], poi_update_complete['name'])
-        # Date in response is a date object, while date in json is just a string
-        # self.assertEqual(response['result']['poi']['date'], poi_update_complete['date'])
-        self.assertEqual(response['result']['poi']['description'], poi_update_complete['description'])
-        for i in range(len(response['result']['poi']['links'])):
-            self.assertEqual(response['result']['poi']['links'][i]['link_url'], poi_update_complete['links'][i]['link_url'])
-            self.assertEqual(response['result']['poi']['links'][i]['display_name'], poi_update_complete['links'][i]['display_name'])
-        for i in range(len(response['result']['poi']['media'])):
-            self.assertEqual(response['result']['poi']['media'][i]['content_url'], poi_update_complete['media'][i]['content_url'])
-            self.assertEqual(response['result']['poi']['media'][i]['caption'], poi_update_complete['media'][i]['caption'])
+        poi = response['result']['poi']
+        for key in poi_create_complete:
+            # Date in response is a date object, while date in json is just a string
+            # self.assertEqual(response['result']['poi']['date'], poi_create_complete['date'])
+            if key not in ['date', 'links', 'media', 'story_ids']:
+                self.assertEqual(poi[key], poi_create_complete[key])
+            elif key == 'links':
+                for j in range(len(poi_update_complete[key])):
+                    self.assertEqual(poi[key][j]['link_url'], poi_update_complete[key][j]['link_url'])
+                    self.assertEqual(poi[key][j]['display_name'], poi_update_complete[key][j]['display_name'])
+            elif key == 'media':
+                for j in range(len(poi_update_complete[key])):
+                    self.assertEqual(poi[key][j]['content_url'], poi_update_complete[key][j]['content_url'])
+                    self.assertEqual(poi[key][j]['caption'], poi_update_complete[key][j]['caption'])
         response_story_ids = [i['_id'] for i in response['result']['poi']['stories']]
         self.assertEqual(sorted(response_story_ids), sorted(poi_update_complete['story_ids']))
 
