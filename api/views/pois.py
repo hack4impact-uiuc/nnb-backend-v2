@@ -41,8 +41,6 @@ def get_pois():
         pois = POI.query.join(StoryPOI, POI.id == StoryPOI.poi_id) \
                         .filter(StoryPOI.story_id == int(story_id))
 
-    if pois.count() == 0:
-        return create_response(status=404, message='No POIs found')
     pois_list = [poi_links_media_stories(i.to_dict()) for i in pois]
     return create_response({'pois': pois_list})
 
