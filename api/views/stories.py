@@ -14,8 +14,6 @@ def get_stories():
     stories = []
     if 'poi_id' in data:
         storyPOIs = StoryPOI.query.filter(StoryPOI.poi_id == data['poi_id'])
-        if storyPOIs.count() == 0:
-            return create_response(status=404, message='No stories found for specified POI')
         for sp in storyPOIs:
             stories.append(Story.query.get(sp.story_id))
         return create_response({'stories': [s.to_dict() for s in stories]})
