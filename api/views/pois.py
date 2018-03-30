@@ -1,5 +1,5 @@
 from api import app, db
-from api.models import POI, Media, Link, Story, StoryPOI
+from api.models import POI, Media, Link, Story, StoryPOI, Map
 from api.utils import create_response, row_constructor
 from flask import Blueprint, request, jsonify
 import json
@@ -37,9 +37,15 @@ def get_pois():
 
     if map_year is not None and story_id is None:
         pois = POI.query.filter(POI.map_year == int(map_year))
+        maps = Map.query.filter(Map.map_year == int(map_year))
+        if maps.count() == 0:
+            return create_response(status=400, message='Map year does not exist')
     elif story_id is not None and map_year is None:
         pois = POI.query.join(StoryPOI, POI.id == StoryPOI.poi_id) \
                         .filter(StoryPOI.story_id == int(story_id))
+        stories = Story.query.filter(Story.id == int(story_id))
+        if stories.count() == 0:
+            return create_response(status=400, message='Story does not exist')
 
     pois_list = [poi_links_media_stories(i.to_dict()) for i in pois]
     return create_response({'pois': pois_list})
