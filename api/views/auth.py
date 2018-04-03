@@ -11,34 +11,30 @@ from api.models import User
 
 mod = Blueprint('auth', __name__)
 
-SIGNUP_URL = '/signup'
-LOGIN_URL = '/login'
-LOGOUT_URL = '/logout'
+SIGNUP_URL = '/auth/signup'
+LOGIN_URL = '/auth/login'
+LOGOUT_URL = '/auth/logout'
+TEST_URL = '/auth/test-token-required'
 
 
 @app.route(SIGNUP_URL, methods=['POST'])
 def create_account():
     request_json = request.get_json()
 
-    keys = set(['username', 'password', 'accepts_email', 'email',
-            'custom_email_subject', 'custom_email_body'])
-    missing_keys = keys - set(request_json.keys())
-    if missing_keys:
+    required_fields = ['username', 'password']
+    missing_fields = [field for field in required_fields if request_json.get(field) is None]
+    if len(missing_fields):
         return create_response(status=400,
-                message='request json is missing the following keys: {}'\
-                .format(missing_keys))
+                message='Request json is missing the following fields: {}' \
+                .format(', '.join(missing_fields)))
 
-    username = request_json['username']
-    password = request_json['password']
-    accepts_email = request_json['accepts_email']
-    email = request_json['email']
-    custom_email_subject = request_json['custom_email_subject']
-    custom_email_body = request_json['custom_email_body']
+    username = request_json.get('username')
+    password = request_json.get('password')
 
     existing_user = User.query.filter_by(username=username).first()
-    if existing_user:
+    if existing_user is not None:
         return create_response(status=400,
-                message='username "{}" is already taken'.format(username))
+                message='Username "{}" is already taken'.format(username))
 
     password_fail_message = auth_utils.validate_password_requirements(password)
     if password_fail_message:
@@ -46,10 +42,7 @@ def create_account():
 
     salt = auth_utils.generate_salt()
     hashed_password = auth_utils.hash_password(password, salt)
-    new_user = User(username=username, accepts_email=accepts_email, email=email,
-                    custom_email_subject=custom_email_subject,
-                    custom_email_body=custom_email_body,
-                    salt=salt, pw_hash=hashed_password)
+    new_user = User(username=username, salt=salt, pw_hash=hashed_password)
 
     db.session.add(new_user)
     db.session.flush()
@@ -65,24 +58,29 @@ def create_account():
     response_data.pop('pw_hash')
     response_data.pop('salt')
     response_data['token'] = token
-    return create_response(data=response_data, status=201,
-                            message='successfully created account')
+    return create_response(data=response_data, status=201, 
+            message='Successfully created account')
 
 
 @app.route(LOGIN_URL, methods=['POST'])
 def log_in_user():
     request_json = request.get_json()
+    INCORRECT_INFO_MSG = 'Incorrect login info'
 
-    try:
-        username = request_json['username']
-        password = request_json['password']
-    except KeyError:
+    required_fields = ['username', 'password']
+    missing_fields = [field for field in required_fields if request_json.get(field) is None]
+    if len(missing_fields):
         return create_response(status=400,
-                message='request json is missing username or password')
+                message='Request json is missing the following fields: {}' \
+                .format(', '.join(missing_fields)))
+
+    username = request_json.get('username')
+    password = request_json.get('password')
 
     user = User.query.filter_by(username=username).first()
-    if not user:
-        return create_response(status=400, message='Incorrect login info')
+    print(user)
+    if user is None:
+        return create_response(status=400, message=INCORRECT_INFO_MSG)
 
     if auth_tokens.token_exists_for_user(user.id):
         return create_response(status=400,
@@ -90,30 +88,26 @@ def log_in_user():
 
     hashed_password = auth_utils.hash_password(password, user.salt)
     if hashed_password != user.pw_hash:
-        return create_response(status=400, message='Incorrect login info')
+        return create_response(status=400, message=INCORRECT_INFO_MSG)
 
     token = auth_tokens.generate_token()
     while not auth_tokens.register_token(token, user.id):
         token = auth_tokens.generate_token()
 
     return create_response(data={'token': token}, status=200,
-                message='Log in success')
+            message='Log in success')
 
 
 @app.route(LOGOUT_URL, methods=['POST'])
 @token_required
 def log_out_user():
     token = request.headers.get(auth_tokens.AUTH_TOKEN_HEADER_NAME)
-    auth_tokens.delete_token(token)
-    return create_response(status=200, message='successfully logged out')
+    success = auth_tokens.delete_token(token)
+    if success:
+        return create_response(status=200, message='Successfully logged out')
+    return create_response(status=400, message='Invalid token')
 
-
-@app.route('/tokens', methods=['GET'])
-def check_tokens():
-    return create_response(data=auth_tokens.active_tokens)
-
-
-@app.route('/test-token-required', methods=['GET'])
+@app.route(TEST_URL, methods=['GET'])
 @token_required
 def example_route_with_automatic_token_check():
-    return create_response(status=200, message='success with auto token check!')
+    return create_response(status=200, message='Success with auto token check!')
