@@ -29,8 +29,4 @@ def validate_password_requirements(password):
         failure_message.append('password must be at least {} characters long'\
                 .format(MIN_REQUIRED_PASSWORD_LEN))
     
-    contains_digit = any(ch in string.digits for ch in password)
-    if not contains_digit:
-        failure_message.append('password must contain at least one digit')
-    
     return '\n'.join(failure_message)
