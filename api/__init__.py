@@ -27,3 +27,6 @@ app.register_blueprint(stories.mod)
 
 from api.views import maps
 app.register_blueprint(maps.mod)
+
+from api.views import auth
+app.register_blueprint(auth.mod)
