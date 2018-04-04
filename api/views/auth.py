@@ -44,7 +44,12 @@ def create_account():
 
     salt = auth_utils.generate_salt()
     hashed_password = auth_utils.hash_password(password, salt)
-    new_user = User(username=username, salt=salt, pw_hash=hashed_password)
+    user_add = {
+        'username': username,
+        'salt': salt,
+        'pw_hash': hashed_password
+    }
+    new_user = row_constructor(User, user_add)
 
     db.session.add(new_user)
     db.session.flush()
