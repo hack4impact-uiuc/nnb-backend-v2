@@ -8,14 +8,12 @@ from api.auth_tokens import token_required
 from api.utils import create_response, row_constructor
 from api.models import User
 
-
 mod = Blueprint('auth', __name__)
 
 SIGNUP_URL = '/auth/signup'
 LOGIN_URL = '/auth/login'
 LOGOUT_URL = '/auth/logout'
 TEST_URL = '/auth/test-token-required'
-
 
 @app.route(SIGNUP_URL, methods=['POST'])
 def create_account():
@@ -24,17 +22,21 @@ def create_account():
     required_fields = ['username', 'password']
     missing_fields = [field for field in required_fields if request_json.get(field) is None]
     if len(missing_fields):
-        return create_response(status=400,
-                message='Request json is missing the following fields: {}' \
-                .format(', '.join(missing_fields)))
+        return create_response(
+            status=400,
+            message='Request json is missing the following fields: {}' \
+            .format(', '.join(missing_fields))
+        )
 
     username = request_json.get('username')
     password = request_json.get('password')
 
     existing_user = User.query.filter_by(username=username).first()
     if existing_user is not None:
-        return create_response(status=400,
-                message='Username "{}" is already taken'.format(username))
+        return create_response(
+            status=400,
+            message='Username "{}" is already taken'.format(username)
+        )
 
     password_fail_message = auth_utils.validate_password_requirements(password)
     if password_fail_message:
@@ -58,9 +60,11 @@ def create_account():
     response_data.pop('pw_hash')
     response_data.pop('salt')
     response_data['token'] = token
-    return create_response(data=response_data, status=201, 
-            message='Successfully created account')
-
+    return create_response(
+        data=response_data,
+        status=201, 
+        message='Successfully created account'
+    )
 
 @app.route(LOGIN_URL, methods=['POST'])
 def log_in_user():
@@ -70,21 +74,24 @@ def log_in_user():
     required_fields = ['username', 'password']
     missing_fields = [field for field in required_fields if request_json.get(field) is None]
     if len(missing_fields):
-        return create_response(status=400,
-                message='Request json is missing the following fields: {}' \
-                .format(', '.join(missing_fields)))
+        return create_response(
+            status=400,
+            message='Request json is missing the following fields: {}' \
+            .format(', '.join(missing_fields))
+        )
 
     username = request_json.get('username')
     password = request_json.get('password')
 
     user = User.query.filter_by(username=username).first()
-    print(user)
     if user is None:
         return create_response(status=400, message=INCORRECT_INFO_MSG)
 
     if auth_tokens.token_exists_for_user(user.id):
-        return create_response(status=400,
-                message='User "{}" is already logged in'.format(username))
+        return create_response(
+            status=400,
+            message='User "{}" is already logged in'.format(username)
+        )
 
     hashed_password = auth_utils.hash_password(password, user.salt)
     if hashed_password != user.pw_hash:
@@ -94,9 +101,11 @@ def log_in_user():
     while not auth_tokens.register_token(token, user.id):
         token = auth_tokens.generate_token()
 
-    return create_response(data={'token': token}, status=200,
-            message='Log in success')
-
+    return create_response(
+        data={'token': token},
+        status=200,
+        message='Log in success'
+    )
 
 @app.route(LOGOUT_URL, methods=['POST'])
 @token_required

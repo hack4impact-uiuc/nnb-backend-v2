@@ -2,7 +2,6 @@ import hashlib
 import secrets
 import string
 
-
 HASH_ALGORITHM = 'sha256'
 NUM_HASH_ITERATIONS = 100000
 HASH_OUTPUT_LEN = 32
@@ -10,7 +9,6 @@ HASH_OUTPUT_LEN = 32
 SALT_NUM_BYTES = 32
 
 MIN_REQUIRED_PASSWORD_LEN = 7
-
 
 def hash_password(password, salt):
     password_bytes = bytearray(password, encoding='utf-8')

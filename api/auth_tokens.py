@@ -18,7 +18,6 @@ auth_tokens = {
 """
 active_tokens = {}
 
-
 def token_required(f):
     """This decorator checks to ensure that the token sent with a request
     exists and is not expired. Returns a failure response if the token does not
@@ -31,12 +30,18 @@ def token_required(f):
         token = request.headers.get(AUTH_TOKEN_HEADER_NAME)
 
         if not token_exists(token):
-            return create_response(data={'token': token}, status=401,
-                    message='invalid authorization token')
+            return create_response(
+                data={'token': token},
+                status=401,
+                message='invalid authorization token'
+            )
         if not is_valid_token(token):
             delete_token(token)
-            return create_response(data={'token': token}, status=401,
-                    message='expired authorization token')
+            return create_response(
+                data={'token': token},
+                status=401,
+                message='expired authorization token'
+            )
 
         update_token_expiration(token)
 
