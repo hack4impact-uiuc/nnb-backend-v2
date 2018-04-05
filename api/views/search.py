@@ -13,9 +13,8 @@ def search_pois():
     pois = []
 
     if data.get('name') is not None:
-        # pois = POI.query.filter(POI.name.contains(data['name']))
+        pois = POI.query.filter(POI.name.like(data['name']))
 
     if pois.count() == 0:
         return create_response(status=404, message='No POIs found')
-    pois_list = [poi_links_media_stories(i.to_dict()) for i in pois]
-    return create_response({'pois': pois_list})
+    return create_response({'pois_list': [p.to_dict() for p in pois]})
