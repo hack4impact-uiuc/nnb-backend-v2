@@ -3,16 +3,17 @@ from api.models import Story, StoryPOI, POI
 from api.utils import create_response, row_constructor
 from flask import Blueprint, request
 
-SEARCH_URL = "/stories"
+SEARCH_URL = "/search"
 
 mod = Blueprint('search', __name__)
 
 @app.route(SEARCH_URL, methods=['GET'])
-def get_pois():
-    name = request.args.get('name')
+def search_pois():
+    data = request.args
+    pois = []
 
-    if name is not None:
-        # do stuff
+    if data.get('name') is not None:
+        # pois = POI.query.filter(POI.name.contains(data['name']))
 
     if pois.count() == 0:
         return create_response(status=404, message='No POIs found')
