@@ -125,13 +125,13 @@ class POITests(unittest.TestCase):
             if key not in ['date', 'links', 'media', 'story_ids']:
                 self.assertEqual(poi[key], poi_create_complete[key])
             elif key == 'links':
-                for j in range(len(poi_create_complete[key])):
-                    self.assertEqual(poi[key][j]['link_url'], poi_create_complete[key][j]['link_url'])
-                    self.assertEqual(poi[key][j]['display_name'], poi_create_complete[key][j]['display_name'])
+                for curr_link in range(len(poi_create_complete[key])):
+                    self.assertEqual(poi[key][curr_link]['link_url'], poi_create_complete[key][curr_link]['link_url'])
+                    self.assertEqual(poi[key][curr_link]['display_name'], poi_create_complete[key][curr_link]['display_name'])
             elif key == 'media':
-                for j in range(len(poi_create_complete[key])):
-                    self.assertEqual(poi[key][j]['content_url'], poi_create_complete[key][j]['content_url'])
-                    self.assertEqual(poi[key][j]['caption'], poi_create_complete[key][j]['caption'])
+                for curr_media in range(len(poi_create_complete[key])):
+                    self.assertEqual(poi[key][curr_media]['content_url'], poi_create_complete[key][curr_media]['content_url'])
+                    self.assertEqual(poi[key][curr_media]['caption'], poi_create_complete[key][curr_media]['caption'])
         response_story_ids = [k['_id'] for k in response['result']['poi']['stories']]
         self.assertEqual(sorted(response_story_ids), sorted(poi_create_complete['story_ids']))
 
@@ -140,8 +140,8 @@ class POITests(unittest.TestCase):
         r = requests.get('http://127.0.0.1:5000/pois?map_year={}'.format(map_year))
         response = r.json()
         self.assertEqual(response['code'], 200)
-        for i in response['result']['pois']:
-            self.assertEqual(i['map_year'], map_year)
+        for curr_poi in response['result']['pois']:
+            self.assertEqual(curr_poi['map_year'], map_year)
 
     def test1_4_get_pois_by_story_id(self):
         story_ids = poi_create_complete['story_ids']
@@ -149,13 +149,10 @@ class POITests(unittest.TestCase):
             r = requests.get('http://127.0.0.1:5000/pois?story_id={}'.format(curr_story_id))
             response = r.json()
             self.assertEqual(response['code'], 200)
-            # created_object_included is used to determine if the POI we previously created is included
+            # Determine if the POI we previously created is included
             # in the list of POIs returned after we get request based on story_ids
-            created_object_included = False
-            for curr_poi in response['result']['pois']:
-                if curr_poi['name'] == poi_create_complete['name']:
-                    created_object_included = True
-            self.assertTrue(created_object_included)
+            poi = next((poi for poi in response['result']['pois'] if poi['name'] == poi_create_complete['name']), None)
+            self.assertIsNotNone(poi)
 
     def test1_5_update_poi(self):
         poi_id = int(os.environ.get('POI_ID'))
@@ -163,11 +160,11 @@ class POITests(unittest.TestCase):
         response = r.json()
         self.assertEqual(response['code'], 200)
         poi = response['result']['poi']
-        for key in poi_create_complete:
+        for key in poi_update_complete:
             # Date in response is a date object, while date in json is just a string
             # self.assertEqual(response['result']['poi']['date'], poi_create_complete['date'])
             if key not in ['date', 'links', 'media', 'story_ids']:
-                self.assertEqual(poi[key], poi_create_complete[key])
+                self.assertEqual(poi[key], poi_update_complete[key])
             elif key == 'links':
                 for j in range(len(poi_update_complete[key])):
                     self.assertEqual(poi[key][j]['link_url'], poi_update_complete[key][j]['link_url'])
@@ -185,6 +182,26 @@ class POITests(unittest.TestCase):
         response = r.json()
         # Successfully updates nothing
         self.assertEqual(response['code'], 200)
+        # Make a get request, and then compare to poi_update_complete
+        # This ensures that the put request did not change something and erronously return a 200 status code.
+        r = requests.get('http://127.0.0.1:5000/pois/{}'.format(poi_id))
+        response = r.json()
+        poi = response['result']['poi']
+        for key in poi_update_complete:
+            # Date in response is a date object, while date in json is just a string
+            # self.assertEqual(response['result']['poi']['date'], poi_create_complete['date'])
+            if key not in ['date', 'links', 'media', 'story_ids']:
+                self.assertEqual(poi[key], poi_update_complete[key])
+            elif key == 'links':
+                for j in range(len(poi_update_complete[key])):
+                    self.assertEqual(poi[key][j]['link_url'], poi_update_complete[key][j]['link_url'])
+                    self.assertEqual(poi[key][j]['display_name'], poi_update_complete[key][j]['display_name'])
+            elif key == 'media':
+                for j in range(len(poi_update_complete[key])):
+                    self.assertEqual(poi[key][j]['content_url'], poi_update_complete[key][j]['content_url'])
+                    self.assertEqual(poi[key][j]['caption'], poi_update_complete[key][j]['caption'])
+        response_story_ids = [i['_id'] for i in response['result']['poi']['stories']]
+        self.assertEqual(sorted(response_story_ids), sorted(poi_update_complete['story_ids']))
 
     def test1_7_delete_poi(self):
         poi_id = int(os.environ.get('POI_ID'))
