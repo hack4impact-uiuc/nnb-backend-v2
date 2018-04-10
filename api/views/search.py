@@ -13,19 +13,13 @@ def search_pois():
     pois_by_name = []
     pois_by_description = []
 
-    if data.get('q') is not None:
-        if data.get('name') is not None:
-            if data.get('name') == "true":
-                pois_by_name = POI.query.filter(POI.name.contains(data['q']))
-        else:
-            return create_response(status=404, message='Missing name parameter (true/false)')
-        if data.get('description') is not None:
-            if data.get('description') == "true":
-                pois_by_description = POI.query.filter(POI.description.contains(data['q']))
-        else:
-            return create_response(status=404, message='Missing description parameter (true/false)')
-    else:
-        return create_response(status=404, message='Missing query parameter')
+    if (data.get('q') and data.get('name') and data.get('description')) is None:
+        return create_response(status=404, message='Must include query, name, and description parameters.')
+
+    if data.get('name') == "true":
+        pois_by_name = POI.query.filter(POI.name.contains(data['q']))
+    if data.get('description') == "true":
+        pois_by_description = POI.query.filter(POI.description.contains(data['q']))
 
     pois_by_name_list = [p.to_dict() for p in pois_by_name]
     pois_by_description_list = [p.to_dict() for p in pois_by_description]
