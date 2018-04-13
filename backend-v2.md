@@ -575,7 +575,7 @@ Delete the story with the specified `story_id`
       result: {}
     }
 
-## Search:
+## Search
 
 ### Endpoint
 
@@ -590,8 +590,8 @@ Get all the POIs containing the query string in its name (or description)
 |    Name     |  Type   | Required     | Description                                         | Example      |
 |:-----------:|:-------:|:------------:|:---------------------------------------------------:|:------------:|
 |      q      | string  | **Required** |  query string to be searched for                    | `Chi`
-|     name    | boolean | **Required** | whether to search for the query in POI names        | true
-| description | boolean | **Required** | whether to search for the query in POI descriptions | false
+|     name    | boolean | **Required** | whether to search for the query in POI names        | `true`
+| description | boolean | **Required** | whether to search for the query in POI descriptions | `false`
 
 **Response**
 
