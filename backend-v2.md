@@ -20,7 +20,7 @@
 
 **MAP**
 
-|   id   | image_url | map_year | 
+|   id   | image_url | map_year |
 |:------:|:---------:|:--------:|
 
 **STORY**
@@ -30,28 +30,31 @@
 
 **STORY_POI**
 
-|   id   |  story_id | poi_id | 
+|   id   |  story_id | poi_id |
 |:------:|:---------:|:-------:|
 
-## Endpoints Documentation 
+## Endpoints Documentation
 
-POIS: 
+POIS:
 * GET /pois
 * GET /pois/<poi_id>
 * POST /pois
 * PUT /pois/<poi_id>
 * DELETE /pois/<poi_id>
 
-MAPS: 
+MAPS:
 * GET /maps
 * POST /maps
 * DELETE /maps
 
-STORIES: 
+STORIES:
 * GET /stories
 * POST /stories
 * PUT /stories/<story_id>
 * DELETE /stories/<story_id>
+
+SEARCH:
+* GET /search/pois
 
 ## Conventions
 This API will follow the [H4I REST API Spec](https://github.com/hack4impact-uiuc/wiki/wiki/Our-REST-API-Specification).
@@ -65,7 +68,7 @@ All `POST` and `PUT` request parameters should be body parameters.
 ### Endpoint
 
     GET /pois
-    
+
 **Description**
 
 Get all the POIs for a given `map_year` or `story_id`
@@ -80,7 +83,7 @@ Get all the POIs for a given `map_year` or `story_id`
 | story_id  | number | **Required** if no `map_year` | Filter POIs by `story_id` | `21`
 
 **Response**
-    
+
     {
       success: true,
       code: 200,
@@ -114,7 +117,7 @@ Get all the POIs for a given `map_year` or `story_id`
         ]
       }
     }
-    
+
 ### Endpoint
 
     GET /pois/<poi_id>
@@ -146,24 +149,24 @@ Retrieve the data of a specified POI:
             {
               _id: 41,
               link_url: 'https://github.com',
-              display_name: 'Github' 
+              display_name: 'Github'
             },
             {
               _id: 42,
               link_url: 'https://google.com',
-              display_name: 'Google' 
+              display_name: 'Google'
             }
           ],
           media: [
             {
               _id: 41,
               content_url: 'https://images.com/koala.jpg',
-              caption: 'Koala' 
+              caption: 'Koala'
             },
             {
               _id: 42,
               content_url: 'https://images.com/armadillo.jpg',
-              caption: 'Armadillo' 
+              caption: 'Armadillo'
             }
           ],
           stories: [
@@ -179,7 +182,7 @@ Retrieve the data of a specified POI:
         }
       }
     }
-    
+
 ### Endpoint
 
     POST /pois
@@ -240,14 +243,14 @@ Create a new POI and:
             {
               _id: 43,
               link_url: 'http://fb.com',
-              display_name: 'Facebook' 
+              display_name: 'Facebook'
             }
           ],
           media: [
             {
               _id: 41,
               content_url: 'http://images.com/llama.jpg',
-              caption: 'The Llama in its natural habitat' 
+              caption: 'The Llama in its natural habitat'
             }
           ],
           stories: [
@@ -263,7 +266,7 @@ Create a new POI and:
         }
       }
     }
-    
+
 ### Endpoint
 
     PUT /pois/<poi_id>
@@ -322,14 +325,14 @@ Edit the data of a POI:
             {
               _id: 43,
               link_url: 'http://facebook.com',
-              display_name: 'Facebook' 
+              display_name: 'Facebook'
             }
           ],
           media: [
             {
               _id: 41,
               content_url: 'http://images.com/llama.jpg',
-              caption: 'The Llama in its natural habitat' 
+              caption: 'The Llama in its natural habitat'
             }
           ],
           stories: [
@@ -362,7 +365,7 @@ Delete the specified POI
       message: 'POI deleted',
       result: {}
     }
-    
+
 ## Maps
 
 ### Endpoint
@@ -399,7 +402,7 @@ Get all map years
         ]
       }
     }
-    
+
 ### Endpoint
 
     POST /maps
@@ -430,7 +433,7 @@ Create a new map
         }
       }
     }
-    
+
 ### Endpoint
 
     DELETE /maps/<map_id>
@@ -456,7 +459,7 @@ Delete the specified map
 
 **Description**
 
-* Get list of story names 
+* Get list of story names
 * Get list of stories a POI is in if given `poi_id`
 
 **Parameters**
@@ -488,7 +491,7 @@ Delete the specified map
         ]
       }
     }
-    
+
 ### Endpoint
 
     POST /stories
@@ -572,3 +575,50 @@ Delete the story with the specified `story_id`
       result: {}
     }
 
+## Search:
+
+### Endpoint
+
+    GET /search/pois
+
+**Description**
+
+Get all the POIs containing the query string in its name (or description)
+
+**Parameters**
+
+|    Name     |  Type   | Required     | Description                                         | Example      |
+|:-----------:|:-------:|:------------:|:---------------------------------------------------:|:------------:|
+|      q      | string  | **Required** |  query string to be searched for                    | `Chi`
+|     name    | boolean | **Required** | whether to search for the query in POI names        | true
+| description | boolean | **Required** | whether to search for the query in POI descriptions | false
+
+**Response**
+
+    {
+      success: true,
+      code: 200,
+      message: '',
+      result: {
+        pois: [
+          {
+            _id: 1,
+            name: 'Himalayan Chimney',
+            date: Date(2018, 2, 27),
+            description: 'Yum',
+            map_year: 2018,
+            x_coord: 23,
+            y_coord: 67
+          },
+          {
+            _id: 2,
+            name: 'Szechuan China',
+            date: Date(2016, 2, 27),
+            description: 'Yummm',
+            map_year: 1969,
+            x_coord: 87,
+            y_coord: 21
+          }
+        ]
+      }
+    }
