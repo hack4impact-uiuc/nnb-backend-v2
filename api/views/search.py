@@ -12,6 +12,7 @@ def search_pois():
     data = request.args
     pois_by_name = []
     pois_by_description = []
+    pois = []
 
     if (data.get('q') and data.get('name') and data.get('description')) is None:
         return create_response(status=404, message='Must include query, name, and description parameters.')
@@ -23,5 +24,8 @@ def search_pois():
 
     pois_by_name_list = [p.to_dict() for p in pois_by_name]
     pois_by_description_list = [p.to_dict() for p in pois_by_description]
-    pois = pois_by_name_list + pois_by_description_list
+    for p in pois_by_name_list:
+        if p not in pois_by_description_list:
+            pois += p
+    pois += pois_by_description_list
     return create_response({'pois': pois})
