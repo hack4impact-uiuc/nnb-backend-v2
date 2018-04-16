@@ -1,5 +1,6 @@
 from api import app, db
 from api.models import POI
+from api.views.pois import poi_links_media_stories
 from api.utils import create_response
 from flask import Blueprint, request
 
@@ -22,10 +23,10 @@ def search_pois():
     if data.get('description') == "true":
         pois_by_description = POI.query.filter(POI.description.contains(data['q']))
 
-    pois_by_name_list = [p.to_dict() for p in pois_by_name]
-    pois_by_description_list = [p.to_dict() for p in pois_by_description]
+    pois_by_name_list = [poi_links_media_stories(p.to_dict()) for p in pois_by_name]
+    pois_by_description_list = [poi_links_media_stories(p.to_dict()) for p in pois_by_description]
     for p in pois_by_name_list:
         if p not in pois_by_description_list:
-            pois += p
+            pois.append(p)
     pois += pois_by_description_list
     return create_response({'pois': pois})
