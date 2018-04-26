@@ -63,6 +63,8 @@ def register_token(token, user_id):
     """Attempt to register a token for the given user. Returns True on success
     and False on failure."""
 
+    expiration = datetime.datetime.now() + DEFAULT_EXPIRATION
+
     # Check redis if it exists
     if REDIS_URL is not None:
         r = redis.Redis(
@@ -198,7 +200,7 @@ def token_exists_for_user(user_id):
 def get_user(token):
     """Returns the user_id associated with the given token. Returns None if the
     token is invalid or expired."""
-    
+
     # Check redis
     if REDIS_URL is not None:
         r = redis.Redis(
