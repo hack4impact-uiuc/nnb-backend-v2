@@ -3,6 +3,7 @@ from api.models import POI
 from api.views.pois import poi_links_media_stories
 from api.utils import create_response
 from flask import Blueprint, request
+from sqlalchemy import func
 
 SEARCH_POIS_URL = "/search/pois"
 
@@ -19,9 +20,9 @@ def search_pois():
         return create_response(status=404, message='Must include query, name, and description parameters.')
 
     if data.get('name') == "true":
-        pois_by_name = POI.query.filter(POI.name.contains(data['q']))
+        pois_by_name = POI.query.filter(func.lower(POI.name).contains(data['q'].lower()))
     if data.get('description') == "true":
-        pois_by_description = POI.query.filter(POI.description.contains(data['q']))
+        pois_by_description = POI.query.filter(func.lower(POI.description).contains(data['q'].lower()))
 
     pois_by_name_list = [poi_links_media_stories(p.to_dict()) for p in pois_by_name]
     pois_by_description_list = [poi_links_media_stories(p.to_dict()) for p in pois_by_description]
