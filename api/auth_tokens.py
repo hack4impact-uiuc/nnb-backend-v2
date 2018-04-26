@@ -1,5 +1,8 @@
 import secrets
 import datetime
+import time
+import os
+import redis
 from functools import wraps
 from flask import request
 from api.utils import create_response
@@ -7,6 +10,10 @@ from api.utils import create_response
 AUTH_TOKEN_HEADER_NAME = 'auth-token'
 AUTH_TOKEN_NUM_BYTES = 32
 DEFAULT_EXPIRATION = datetime.timedelta(hours=1)
+
+REDIS_URL = os.environ.get('REDIS_URL')
+REDIS_PORT = os.environ.get('REDIS_PORT')
+REDIS_PW = os.environ.get('REDIS_PW')
 
 """
 auth_tokens = {
@@ -55,9 +62,23 @@ def generate_token():
 def register_token(token, user_id):
     """Attempt to register a token for the given user. Returns True on success
     and False on failure."""
+
+    # Check redis if it exists
+    if REDIS_URL is not None:
+        r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+        if r.exists(token):
+            return False
+        expiration = int(time.mktime(expiration.timetuple()))
+        r.lpush(token, expiration, user_id)
+        return True
+    
+    # Check memory
     if token in active_tokens:
         return False
-    expiration = datetime.datetime.now() + DEFAULT_EXPIRATION
     active_tokens[token] = {
         'user_id': user_id,
         'expiration': expiration
@@ -67,11 +88,37 @@ def register_token(token, user_id):
 def token_exists(token):
     """Returns True if the given token exists in the tokens store. Returns
     False otherwise."""
+
+    # Check redis if it exists
+    if REDIS_URL is not None:
+        r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+        return r.exists(token)
+
+    # Check memory
     return token in active_tokens
 
 def is_valid_token(token):
     """Returns True if the given token is valid and not expired.
     Returns False otherwise."""
+
+    # Check redis if it exists
+    if REDIS_URL is not None:
+        r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+        if r.exists(token):
+            expiration = int(r.lindex(token, 1))
+            curr_time = int(time.mktime(datetime.datetime.now().timetuple()))
+            return expiration > curr_time
+        return False
+
+    # Check memory
     if token in active_tokens:
         return active_tokens[token]['expiration'] > datetime.datetime.now()
     return False
@@ -80,8 +127,24 @@ def update_token_expiration(token):
     """Attempt to update expiration timestamp of the given token.
     If the token is valid, adds DEFAULT_EXPIRATION many time units to the
     token's expiration timestamp and returns True. Otherwise returns False."""
+
+    expiration = datetime.datetime.now() + DEFAULT_EXPIRATION
+
+    # Check redis if it exists
+    if REDIS_URL is not None:
+        r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+        if r.exists(token):
+            expiration = int(time.mktime(expiration.timetuple()))
+            r.lset(token, 1, expiration)
+            return True
+        return False
+    
+    # Check memory
     if token in active_tokens:
-        expiration = datetime.datetime.now() + DEFAULT_EXPIRATION
         active_tokens[token]['expiration'] = expiration
         return True
     return False
@@ -89,6 +152,20 @@ def update_token_expiration(token):
 def delete_token(token):
     """Attempt to invalidate the given token. Returns True if the token existed
     as an active token. Otherwise returns False."""
+
+    # Check redis if it exists
+    if REDIS_URL is not None:
+        r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+        if r.exists(token):
+            r.delete(token)
+            return True
+        return False
+
+    # Check memory
     if token in active_tokens:
         active_tokens.pop(token)
         return True
@@ -97,6 +174,22 @@ def delete_token(token):
 def token_exists_for_user(user_id):
     """Returns True if a valid, unexpired token exists for the given user.
     Returns False otherwise."""
+
+    # Check redis if it exists
+    if REDIS_URL is not None:
+        r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+        for key in r.scan_iter():
+            if int(r.lindex(key, 0)) == user_id:
+                expiration = int(r.lindex(key, 1))
+                curr_time = int(time.mktime(datetime.datetime.now().timetuple()))
+                return expiration > curr_time
+        return False
+
+    # Check memory
     for token in active_tokens:
         if active_tokens[token]['user_id'] == user_id:
             return active_tokens[token]['expiration'] > datetime.datetime.now()
@@ -105,6 +198,22 @@ def token_exists_for_user(user_id):
 def get_user(token):
     """Returns the user_id associated with the given token. Returns None if the
     token is invalid or expired."""
+    
+    # Check redis
+    if REDIS_URL is not None:
+        r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+        if r.exists(token):
+            expiration = int(r.lindex(token, 1))
+            curr_time = int(time.mktime(datetime.datetime.now().timetuple()))
+            if expiration > curr_time:
+                return int(r.lindex(token, 0))
+        return None
+
+    # Check memory
     if token in active_tokens:
         if active_tokens[token]['expiration'] > datetime.datetime.now():
             return active_tokens[token]['user_id']
