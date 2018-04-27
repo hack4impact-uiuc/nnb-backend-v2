@@ -15,6 +15,14 @@ REDIS_URL = os.environ.get('REDIS_URL')
 REDIS_PORT = os.environ.get('REDIS_PORT')
 REDIS_PW = os.environ.get('REDIS_PW')
 
+r = None
+if REDIS_URL is not None:
+    r = redis.Redis(
+            host=REDIS_URL,
+            port=REDIS_PORT,
+            password=REDIS_PW
+        )
+
 """
 auth_tokens = {
     <token string>: {
@@ -66,12 +74,7 @@ def register_token(token, user_id):
     expiration = datetime.datetime.now() + DEFAULT_EXPIRATION
 
     # Check redis if it exists
-    if REDIS_URL is not None:
-        r = redis.Redis(
-            host=REDIS_URL,
-            port=REDIS_PORT,
-            password=REDIS_PW
-        )
+    if r is not None:
         if r.exists(token):
             return False
         expiration = int(time.mktime(expiration.timetuple()))
@@ -92,12 +95,7 @@ def token_exists(token):
     False otherwise."""
 
     # Check redis if it exists
-    if REDIS_URL is not None:
-        r = redis.Redis(
-            host=REDIS_URL,
-            port=REDIS_PORT,
-            password=REDIS_PW
-        )
+    if r is not None:
         return r.exists(token)
 
     # Check memory
@@ -108,12 +106,7 @@ def is_valid_token(token):
     Returns False otherwise."""
 
     # Check redis if it exists
-    if REDIS_URL is not None:
-        r = redis.Redis(
-            host=REDIS_URL,
-            port=REDIS_PORT,
-            password=REDIS_PW
-        )
+    if r is not None:
         if r.exists(token):
             expiration = int(r.lindex(token, 1))
             curr_time = int(time.mktime(datetime.datetime.now().timetuple()))
@@ -133,12 +126,7 @@ def update_token_expiration(token):
     expiration = datetime.datetime.now() + DEFAULT_EXPIRATION
 
     # Check redis if it exists
-    if REDIS_URL is not None:
-        r = redis.Redis(
-            host=REDIS_URL,
-            port=REDIS_PORT,
-            password=REDIS_PW
-        )
+    if r is not None:
         if r.exists(token):
             expiration = int(time.mktime(expiration.timetuple()))
             r.lset(token, 1, expiration)
@@ -156,12 +144,7 @@ def delete_token(token):
     as an active token. Otherwise returns False."""
 
     # Check redis if it exists
-    if REDIS_URL is not None:
-        r = redis.Redis(
-            host=REDIS_URL,
-            port=REDIS_PORT,
-            password=REDIS_PW
-        )
+    if r is not None:
         if r.exists(token):
             r.delete(token)
             return True
@@ -178,12 +161,7 @@ def token_exists_for_user(user_id):
     Returns False otherwise."""
 
     # Check redis if it exists
-    if REDIS_URL is not None:
-        r = redis.Redis(
-            host=REDIS_URL,
-            port=REDIS_PORT,
-            password=REDIS_PW
-        )
+    if r is not None:
         for key in r.scan_iter():
             if int(r.lindex(key, 0)) == user_id:
                 expiration = int(r.lindex(key, 1))
@@ -202,12 +180,7 @@ def get_user(token):
     token is invalid or expired."""
 
     # Check redis
-    if REDIS_URL is not None:
-        r = redis.Redis(
-            host=REDIS_URL,
-            port=REDIS_PORT,
-            password=REDIS_PW
-        )
+    if r is not None:
         if r.exists(token):
             expiration = int(r.lindex(token, 1))
             curr_time = int(time.mktime(datetime.datetime.now().timetuple()))
