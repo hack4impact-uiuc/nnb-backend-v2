@@ -15,16 +15,6 @@ map_add_json_1 = {
     "image_url": 'http://www.arizona-leisure.com/gfx/maps/valley-sun-map-760.gif'
  }
 
-map_add_json_2 = {
-    "map_year" : 1670,
-    "image_url": 'http://www.fultonranchtownecenter.com/Post/sections/11/Images/FR_MasterPlan.jpg',
-}
-
-map_add_json_3 = {
-    "map_year" : 3000,
-    "image_url" : "https://pcavote.files.wordpress.com/2015/12/jonas-brothers-reunion.jpg"
-}
-
 map_add_json_bad_1 = {
     "image_url": 'http://www.fultonranchtownecenter.com/Post/sections/11/Images/FR_MasterPlan.jpg'
 }
@@ -76,14 +66,10 @@ poi_add_json_3 = {
 def find_map_occurence(map_obj):
     data = requests.get('http://127.0.0.1:5000/maps')
     map_year = map_obj['map_year']
-    map_year_list = list(filter(lambda x: x['map_year'], data.json()['result']['maps']))
+    map_year_list = [x['map_year'] for x in data.json()['result']['maps']]
     while map_year in map_year_list:
         map_year = random.randInt(1800,2018)
     map_obj['map_year'] = map_year
-
-# def find_non_existent_id():
-#     _id = 13
-
 
 
 class MapTests(unittest.TestCase):
@@ -95,14 +81,16 @@ class MapTests(unittest.TestCase):
         post_data = requests.post('http://127.0.0.1:5000/maps', json= map_add_json_1)
         get_data = requests.get('http://127.0.0.1:5000/maps')
 
-        post_data_body = post_data.json()['result']['map']
-        get_data_body = get_data.json()['result']['maps']
-        self.assertEqual(post_data.json()['code'], 201)
-        self.assertEqual(get_data.json()['code'], 200)
+        post_data_json = post_data.json()
+        get_data_json = get_data.json()
+        post_data_body = post_data_json['result']['map']
+        get_data_body = get_data_json['result']['maps']
+        self.assertEqual(post_data_json['code'], 201)
+        self.assertEqual(get_data_json['code'], 200)
 
         map_id_list = [x['_id'] for x in get_data_body]
         map_posted = post_data_body['_id'] in map_id_list
-        self.assertEqual(True, map_posted)
+        self.assertTrue(map_posted)
 
         # is there a way to shorten this ?
 
