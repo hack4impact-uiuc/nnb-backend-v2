@@ -1,7 +1,6 @@
 from api import app, db
 from api.models import Map, POI
 from api.utils import create_response, row_constructor
-from api.auth_tokens import token_required
 from flask import Blueprint, request, jsonify
 import json
 
@@ -16,7 +15,6 @@ def get_map_years():
     return create_response({'maps' : maps})
 
 @app.route(MAPS_URL, methods=['POST'])
-@token_required
 def create_map():
     data = request.get_json()
     fields = ['image_url', 'map_year']
@@ -33,7 +31,6 @@ def create_map():
     return create_response({'map' : Map.query.get(map_id).to_dict()}, 201, 'Map created')
 
 @app.route(MAPS_ID_URL, methods=['DELETE'])
-@token_required
 def delete_map(map_id):
     map_obj = Map.query.get(map_id)
     if map_obj is None:

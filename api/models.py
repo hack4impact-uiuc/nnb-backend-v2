@@ -3,17 +3,6 @@ from api.utils import Mixin
 from sqlalchemy.dialects.postgresql import JSON
 from flask_sqlalchemy import SQLAlchemy
 
-class User(Mixin, db.Model):
-    __tablename__ = 'user'
-
-    id = db.Column(db.Integer, unique=True, primary_key=True)
-    username = db.Column(db.String, unique=True, nullable=False)
-    salt = db.Column(db.String, nullable=False)
-    pw_hash = db.Column(db.String, nullable=False)
-
-    def __repr__(self):
-        return '<username {} >'.format(self.username)
-
 class POI(Mixin, db.Model):
     __tablename__ = 'poi'
 
