@@ -19,7 +19,7 @@ def runserver():
 
 @manager.command
 def runworker():
-    app.run(debug=False, ssl_context='adhoc')
+    app.run(debug=False)
 
 
 @manager.command
