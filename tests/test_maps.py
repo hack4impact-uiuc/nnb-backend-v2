@@ -9,27 +9,28 @@ import requests
 from flask import jsonify
 import json
 
+MAPS_URL = 'http://127.0.0.1:5000/maps'
 # json objects to be tested
-map_good_json = {
+good_map = {
     "map_year" : 1669,
     "image_url": 'http://www.arizona-leisure.com/gfx/maps/valley-sun-map-760.gif'
 }
 
-map_bad_jsons = []
-map_bad_jsons.append(
+bad_maps = []
+bad_maps.append(
     {
         "image_url": 'http://www.fultonranchtownecenter.com/Post/sections/11/Images/FR_MasterPlan.jpg'
     }
 )
-map_bad_jsons.append(
+bad_maps.append(
     {
         "map_year": 2000
     }
 )
-map_bad_jsons.append({})
+bad_maps.append({})
 
-poi_jsons = []
-poi_jsons.append(
+pois = []
+pois.append(
     {
         "name" : "The battle of the Bulge",
         "date" : "5/20",
@@ -42,7 +43,7 @@ poi_jsons.append(
         'story_ids': []
     }
 )
-poi_jsons.append(
+pois.append(
     {
         "name" : "The Great Herbal Fire",
         "date" : "4/20",
@@ -55,7 +56,7 @@ poi_jsons.append(
         'story_ids': []
     }
 )
-poi_jsons.append(
+pois.append(
     {
         "name" : "Nithin Becomes a Man",
         "date" : "2/4",
@@ -71,7 +72,7 @@ poi_jsons.append(
 
 # assigns map_obj a unique year not in the map list
 def find_unique_year(map_obj):
-    data = requests.get('http://127.0.0.1:5000/maps')
+    data = requests.get(MAPS_URL)
     map_year = map_obj['map_year']
     map_year_list = [x['map_year'] for x in data.json()['result']['maps']]
     while map_year in map_year_list:
@@ -80,43 +81,40 @@ def find_unique_year(map_obj):
 
 
 class MapTests(unittest.TestCase):
- # this is a comprensive test suite for testing the map end points
+    # this is a comprensive test suite for testing the map end points
+    def test_map_post(self):
+        # test good map
+        find_unique_year(good_map)
+        response = requests.post(MAPS_URL, json=good_map)
+        response_json = response.json()
+        self.assertEqual(response_json['code'], 201)
+        response_map = response_json['result']['map']
+        self.assertEqual(response_map['map_year'], good_map['map_year'])
+        self.assertEqual(response_map['image_url'], good_map['image_url'])
+        # test bad maps
+        for bad_map in bad_maps:
+            result = requests.post(MAPS_URL, json=bad_map)
+            result_json = result.json()
+            self.assertEqual(result_json['code'], 400)
+            result_data = result_json['result']
+            self.assertEqual(bad_map, result_data)
 
-    def test_map_post_get(self):
+    # TODO
+    def test_map_get(self):
         # testing 1 post and 1 get
-        find_unique_year(map_good_json)
-        post_data = requests.post('http://127.0.0.1:5000/maps', json= map_good_json)
-        get_data = requests.get('http://127.0.0.1:5000/maps')
-
-        post_data_json = post_data.json()
+        get_data = requests.get(MAPS_URL)
         get_data_json = get_data.json()
-        post_data_body = post_data_json['result']['map']
         get_data_body = get_data_json['result']['maps']
-        self.assertEqual(post_data_json['code'], 201)
         self.assertEqual(get_data_json['code'], 200)
 
-        map_id_list = [x['_id'] for x in get_data_body]
-        map_posted = post_data_body['_id'] in map_id_list
-        self.assertTrue(map_posted)
-
-        # is there a way to shorten this ?
-
-        map_in_list = None
-        for map_obj in get_data_body:
-            if map_obj['_id'] == post_data_body['_id']:
-                map_in_list = map_obj
-                break
-
-        self.assertEqual(post_data_body['map_year'], map_in_list['map_year'])
-        self.assertEqual(post_data_body['image_url'], map_in_list['image_url'])
-
-    def test_map_post_get_delete_bad(self):
+    # TODO
+    def test_map_delete_bad(self):
         # test that the proper status_code is returned given bad requests
-        before_get = requests.get('http://127.0.0.1:5000/maps')
+        before_get = requests.get(MAPS_URL)
         before_size = len(before_get.json()['result']['maps'])
 
-        for map_bad_json in map_bad_jsons:
-            response = requests.post('http://127.0.0.1:5000/maps', json= map_bad_json)
+        for map_bad_json in bad_maps:
+            response = requests.post(MAPS_URL, json= map_bad_json)
             self.assertEqual(response.json()['code'], 400)
 
         id = 1
@@ -125,28 +123,29 @@ class MapTests(unittest.TestCase):
         response = requests.delete('http://127.0.0.1:5000/maps/{}'.format(id))
         self.assertEqual(response.json()['status'], 404)
 
-        after_get = requests.get('http://127.0.0.1:5000/maps')
+        after_get = requests.get(MAPS_URL)
         after_size = len(after_get.json()['result']['maps'])
         self.assertEqual(before_size,after_size)
 
         # This test suite is under the assumption that the post_poi/get_poi
         # is fully functional.
 
-    def test_map_delete(self):
+    # TODO
+    def test_map_delete_good(self):
         # tests the delete functionality and checks that the pois are deleted as
         # well
-        find_unique_year(map_good_json)
-        for poi_json in poi_jsons:
-            poi_json['map_year'] = map_good_json['map_year']
+        find_unique_year(good_map)
+        for poi_json in pois:
+            poi_json['map_year'] = good_map['map_year']
             requests.post('http://127.0.0.1:5000/pois', json=poi_json)
 
-        post_data = requests.post('http://127.0.0.1:5000/maps', json=map_good_json)
+        post_data = requests.post(MAPS_URL, json=good_map)
         post_data_body = post_data.json()['result']['map']
         id = post_data_body['_id']
         response = requests.delete('http://127.0.0.1:5000/maps/{}'.format(id))
         self.assertEqual(response.json()['status'], 200)
 
-        get_data = requests.get('http://127.0.0.1:5000/maps')
+        get_data = requests.get(MAPS_URL)
         get_data_body = get_data.json()['result']['maps']
         map_deleted = id not in [x['_id'] for x in get_data_body]
         self.assertTrue(map_deleted)
