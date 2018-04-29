@@ -167,14 +167,15 @@ def token_exists_for_user(user_id):
                 expiration = int(r.lindex(key, 1))
                 curr_time = int(time.mktime(datetime.datetime.now().timetuple()))
                 if expiration > curr_time:
-                    return key
+                    return key.decode(encoding='utf-8')
                 return False
         return False
 
     # Check memory
     for token in active_tokens:
         if active_tokens[token]['user_id'] == user_id:
-            return active_tokens[token]['expiration'] > datetime.datetime.now()
+            if active_tokens[token]['expiration'] > datetime.datetime.now():
+                return token
     return False
 
 def get_user(token):
