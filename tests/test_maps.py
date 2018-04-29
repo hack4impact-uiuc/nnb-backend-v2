@@ -14,6 +14,7 @@ def id_to_url(map_id):
     return MAPS_URL + '/{}'.format(map_id)
 
 # json objects to be tested
+good_map_id = { '_id' : -1 }
 good_map = {
     'map_year' : 1669,
     'image_url': 'http://www.arizona-leisure.com/gfx/maps/valley-sun-map-760.gif'
@@ -82,16 +83,12 @@ def find_unique_year(map_obj):
         map_year +=1
     map_obj['map_year'] = map_year
 
+def set_map_id(map_id):
+    good_map_id['_id'] = map_id
 
 # this is a comprensive test suite for testing the map end points
 class MapTests(unittest.TestCase):
-    def test_map(self):
-        self.map_id = -1
-        self.test_map_post()
-        self.test_map_get()
-        self.test_map_delete()
-    
-    def test_map_post(self):
+    def test1_map_post(self):
         # test good map
         find_unique_year(good_map)
         response = requests.post(MAPS_URL, json=good_map)
@@ -100,7 +97,7 @@ class MapTests(unittest.TestCase):
         response_map = response_json['result']['map']
         self.assertEqual(response_map['map_year'], good_map['map_year'])
         self.assertEqual(response_map['image_url'], good_map['image_url'])
-        self.map_id = response_map['_id']
+        set_map_id(response_map['_id'])
         # test bad maps
         for bad_map in bad_maps:
             result = requests.post(MAPS_URL, json=bad_map)
@@ -116,24 +113,24 @@ class MapTests(unittest.TestCase):
         self.assertEqual(response_json['code'], 200)
         response_maps = response_json['result']['maps']
         for map in response_maps:
-            if map['_id'] == self.map_id:
+            if map['_id'] == map_id:
                 self.assertEqual(map['map_year'], good_map['map_year'])
                 self.assertEqual(map['image_url'], good_map['image_url'])
                 return True
         return False
 
     # assumes post worked
-    def test_map_get(self):
+    def test2_map_get(self):
         # testing good map is in list
-        self.assertTrue(self.id_in_maps(self.map_id))
+        self.assertTrue(self.id_in_maps(good_map_id['_id']))
 
     # assumes post worked
-    def test_map_delete(self):
+    def test3_map_delete(self):
         # test delete on nonexistent map
-        bad_response = requests.delete(id_to_url(-1))
-        self.assertEqual(bad_response.json()['status'], 404)
+        bad_response = requests.delete(id_to_url(0))
+        self.assertEqual(bad_response.json()['code'], 404)
         # test delete on good_map
-        response = requests.delete(id_to_url(self.map_id))
+        response = requests.delete(id_to_url(good_map_id['_id']))
         self.assertEqual(response.json()['code'], 200)
         # check that good_map no longer in list
-        self.assertFalse(self.id_in_maps(self.map_id))
+        self.assertFalse(self.id_in_maps(good_map_id['_id']))
