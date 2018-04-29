@@ -92,10 +92,12 @@ def log_in_user():
     if user is None:
         return create_response(status=400, message=INCORRECT_INFO_MSG)
 
-    if auth_tokens.token_exists_for_user(user.id):
+    token = auth_tokens.token_exists_for_user(user.id)
+    if token:
         return create_response(
-            status=400,
-            message='User "{}" is already logged in'.format(username)
+            data={'token': token},
+            status=200,
+            message='Log in success'
         )
 
     hashed_password = auth_utils.hash_password(password, user.salt)
