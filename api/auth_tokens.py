@@ -166,7 +166,9 @@ def token_exists_for_user(user_id):
             if int(r.lindex(key, 0)) == user_id:
                 expiration = int(r.lindex(key, 1))
                 curr_time = int(time.mktime(datetime.datetime.now().timetuple()))
-                return expiration > curr_time
+                if expiration > curr_time:
+                    return key
+                return False
         return False
 
     # Check memory
