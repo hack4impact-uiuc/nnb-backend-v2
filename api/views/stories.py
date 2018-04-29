@@ -1,6 +1,7 @@
 from api import app, db
 from api.models import Story, StoryPOI
 from api.utils import create_response, row_constructor
+from api.auth_tokens import token_required
 from flask import Blueprint, request
 
 mod = Blueprint('stories', __name__)
@@ -21,6 +22,7 @@ def get_stories():
     return create_response({'stories': [s.to_dict() for s in stories]})
 
 @app.route(STORIES_URL, methods=['POST'])
+@token_required
 def post_stories():
     data = request.get_json()
     if data.get('story_name') is not None:
@@ -37,6 +39,7 @@ def post_stories():
     return create_response(data={'story': story.to_dict()}, status=201, message='Story created')
 
 @app.route(STORIES_ID_URL, methods=['PUT'])
+@token_required
 def put_stories(story_id):
     data = request.get_json()
     fields = ['story_name', 'poi_ids']
@@ -61,6 +64,7 @@ def put_stories(story_id):
     return create_response(data={'story': story.to_dict()}, message='Story updated')
 
 @app.route(STORIES_ID_URL, methods=['DELETE'])
+@token_required
 def delete_stories(story_id):
     to_delete = Story.query.get(story_id)
     if to_delete is None:

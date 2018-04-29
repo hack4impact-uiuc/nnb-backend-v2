@@ -1,6 +1,7 @@
 from api import app, db
 from api.models import POI, Media, Link, Story, StoryPOI, Map
 from api.utils import create_response, row_constructor
+from api.auth_tokens import token_required
 from flask import Blueprint, request, jsonify
 import json
 from datetime import date
@@ -59,6 +60,7 @@ def get_poi_by_id(poi_id):
     return create_response({'poi': poi_result})
 
 @app.route(POIS_URL, methods=['POST'])
+@token_required
 def create_poi():
     data = request.get_json()
 
@@ -115,6 +117,7 @@ def create_poi():
     return create_response(response_data, 201, 'POI created')
 
 @app.route(POIS_ID_URL, methods=['PUT'])
+@token_required
 def update_poi(poi_id):
     poi = POI.query.get(poi_id)
     if poi is None:
@@ -157,6 +160,7 @@ def update_poi(poi_id):
     return create_response(response_data, 200, 'POI edited')
 
 @app.route(POIS_ID_URL, methods=['DELETE'])
+@token_required
 def delete_poi(poi_id):
     poi = POI.query.get(poi_id)
     if poi is None:
