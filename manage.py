@@ -2,7 +2,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from api import db, app
 import pandas as pd
-import os 
+import os
 import glob
 
 
@@ -56,12 +56,12 @@ def backup_db():
         files = glob.glob(backup_tables_dir+'/*')
         for file in files:
             os.remove(file)
-            
+
     #Get list of table names
     table_names = []
     for table_data in db.metadata.tables.items():
         table_names.append(table_data[0])
-        
+
     #Query all tables and write to csv
     for table_name in table_names:
         query_string = 'SELECT * FROM {};'.format(table_name)

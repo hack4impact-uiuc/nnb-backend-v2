@@ -8,6 +8,7 @@ from api.utils import create_response, InvalidUsage
 mod = Blueprint('main', __name__)
 
 # function that is called when you visit /
+
 @app.route('/')
 def index():
     return '<h1>Test 1.0!</h1>'
