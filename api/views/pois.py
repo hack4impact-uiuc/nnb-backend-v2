@@ -77,7 +77,7 @@ def create_poi():
     missing_content = [field for field in content_fields if type(data.get(field)) is not list]
     for field in missing_content:
         data[field] = []
-    
+
     # Assume that data['date'] is a parsable string with a date only if it's already a string
     data['date'] = parse(data['date']) if type(data.get('date')) is str else date(data['map_year'], 1, 1)
     link_urls = [link.get('link_url') for link in data['links']]
@@ -129,7 +129,7 @@ def update_poi(poi_id):
     edit_poi_columns = [col for col in poi_columns if data.get(col) is not None]
     for col in edit_poi_columns:
         setattr(poi, col, data[col])
-    
+
     # Replace all links, media, and story_id if they were given
     if data.get('links') is not None:
         for link in Link.query.filter(Link.poi_id == poi_id):

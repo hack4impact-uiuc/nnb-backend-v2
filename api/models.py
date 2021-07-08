@@ -36,7 +36,7 @@ class POI(Mixin, db.Model):
 class Media(Mixin, db.Model):
     __tablename__ = 'media'
 
-    id = db.Column(db.Integer, unique=True, primary_key=True) 
+    id = db.Column(db.Integer, unique=True, primary_key=True)
     content_url = db.Column(db.String, nullable=True)
     caption = db.Column(db.String, nullable=True)
     poi_id = db.Column(db.Integer, db.ForeignKey('poi.id', ondelete='CASCADE'), nullable=True)
@@ -58,7 +58,7 @@ class Link(Mixin, db.Model):
 class Map(Mixin, db.Model):
     __tablename__ = 'map'
 
-    id = db.Column(db.Integer, unique=True, primary_key=True) 
+    id = db.Column(db.Integer, unique=True, primary_key=True)
     image_url = db.Column(db.String, nullable=False)
     map_year = db.Column(db.Integer, nullable=False)
 
